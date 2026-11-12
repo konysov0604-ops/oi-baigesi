@@ -726,5 +726,85 @@ if (remaining(grade) === 0) {
 
 render();
 </script>
+  <script>
+(() => {
+  const pictures = [
+    "impuls.png.png",
+    "kvant.png.png",
+    "nova.png.png"
+  ];
+
+  const style = document.createElement("style");
+  style.textContent = `
+    .team-icon {
+      height: 105px;
+      display: grid;
+      place-items: center;
+    }
+
+    .team-icon img {
+      width: 105px;
+      height: 105px;
+      object-fit: contain;
+      filter: drop-shadow(0 5px 15px #0005);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    #symbol img {
+      display: block;
+      width: 125px;
+      height: 125px;
+      margin: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 0 14px var(--accent));
+    }
+
+    @media (max-width: 650px) {
+      .team-icon { height: 75px; }
+      .team-icon img { width: 75px; height: 75px; }
+      #symbol img { width: 100px; height: 100px; }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Төменгі үш команданың суреттері.
+  pictures.forEach((file, index) => {
+    const image = document.createElement("img");
+    image.src = file;
+    image.alt = TEAMS[index].name;
+    document.querySelector(
+      "#team" + index + " .team-icon"
+    ).replaceChildren(image);
+
+    // Сканер ашылғанша суретті жүктеп қою.
+    const preload = new Image();
+    preload.src = file;
+  });
+
+  // Команда анықталғанда ортасына сол сурет шығады.
+  const symbol = document.getElementById("symbol");
+
+  const observer = new MutationObserver(() => {
+    if (symbol.querySelector("img")) return;
+
+    const index = TEAMS.findIndex(
+      team => team.icon === symbol.textContent.trim()
+    );
+
+    if (index === -1) return;
+
+    const image = document.createElement("img");
+    image.src = pictures[index];
+    image.alt = TEAMS[index].name;
+    symbol.replaceChildren(image);
+  });
+
+  observer.observe(symbol, {
+    childList: true,
+    characterData: true,
+    subtree: true
+  });
+})();
+</script>
 </body>
 </html>
