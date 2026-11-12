@@ -806,5 +806,228 @@ render();
   });
 })();
 </script>
+  <script>
+(() => {
+  // Бұрынғы қарапайым дыбысты жаңа әуенмен ауыстырамыз.
+  tone = function () {};
+
+  let ctx;
+  let scanning = false;
+  let activeNodes = [];
+  let scheduled = [];
+
+  function openAudio() {
+    if (!sound) return;
+
+    const Audio = window.AudioContext || window.webkitAudioContext;
+    if (!Audio) return;
+
+    if (!ctx) ctx = new Audio();
+    ctx.resume().catch(() => {});
+  }
+
+  function stopAudio() {
+    scheduled.forEach(clearTimeout);
+    scheduled = [];
+
+    activeNodes.forEach(node => {
+      try { node.stop(); } catch (error) {}
+    });
+    activeNodes = [];
+  }
+
+  function later(callback, milliseconds) {
+    scheduled.push(setTimeout(() => {
+      if (sound) callback();
+    }, milliseconds));
+  }
+
+  function note(frequency, duration, delay = 0,
+                type = "sine", volume = .07, endFrequency) {
+    if (!sound || !ctx || ctx.state !== "running") return;
+
+    const now = ctx.currentTime + delay;
+    const oscillator = ctx.createOscillator();
+    const envelope = ctx.createGain();
+
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, now);
+
+    if (endFrequency) {
+      oscillator.frequency.exponentialRampToValueAtTime(
+        endFrequency, now + duration
+      );
+    }
+
+    envelope.gain.setValueAtTime(0, now);
+    envelope.gain.linearRampToValueAtTime(volume, now + .025);
+    envelope.gain.exponentialRampToValueAtTime(
+      .0001, now + duration
+    );
+
+    oscillator.connect(envelope);
+    envelope.connect(ctx.destination);
+
+    oscillator.start(now);
+    oscillator.stop(now + duration + .05);
+
+    activeNodes.push(oscillator);
+    oscillator.onended = () => {
+      oscillator.disconnect();
+      envelope.disconnect();
+      activeNodes = activeNodes.filter(n => n !== oscillator);
+    };
+  }
+
+  // Шынайы жазба емес, сыбдырға ұқсас синтезделген үн.
+  function rustle() {
+    if (!sound || !ctx || ctx.state !== "running") return;
+
+    const duration = .85;
+    const buffer = ctx.createBuffer(
+      1, Math.ceil(ctx.sampleRate * duration), ctx.sampleRate
+    );
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) *
+        (.55 + .45 * Math.sin(i / ctx.sampleRate * 32));
+    }
+
+    const source = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    const envelope = ctx.createGain();
+    const now = ctx.currentTime;
+
+    source.buffer = buffer;
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(1700, now);
+    filter.frequency.exponentialRampToValueAtTime(550, now + duration);
+    filter.Q.value = .65;
+
+    envelope.gain.setValueAtTime(0, now);
+    envelope.gain.linearRampToValueAtTime(.11, now + .12);
+    envelope.gain.exponentialRampToValueAtTime(.0001, now + duration);
+
+    source.connect(filter);
+    filter.connect(envelope);
+    envelope.connect(ctx.destination);
+
+    source.start(now);
+    source.stop(now + duration);
+
+    activeNodes.push(source);
+    source.onended = () => {
+      source.disconnect();
+      filter.disconnect();
+      envelope.disconnect();
+      activeNodes = activeNodes.filter(n => n !== source);
+    };
+  }
+
+  function scanMusic() {
+    stopAudio();
+
+    rustle();
+    note(130, .75, .12, "sine", .05, 390);
+
+    // Хоёр толқыннан кейін қысқа тыныштық.
+    later(() => {
+      note(330, .35, 0, "sine", .065, 550);
+      note(660, .18, .22, "sine", .045);
+    }, 900);
+
+    later(() => {
+      note(440, .35, 0, "sine", .065, 880);
+      note(1100, .18, .25, "sine", .04);
+    }, 1800);
+  }
+
+  function revealMusic(team) {
+    stopAudio();
+
+    if (team === 0) {
+      // ИМПУЛЬС: электр серпіні және екі соққы.
+      note(160, .22, 0, "triangle", .09, 700);
+      note(110, .26, .15, "sine", .12, 48);
+      note(110, .3, .43, "sine", .1, 48);
+      note(660, .5, .55, "triangle", .055);
+      note(880, .65, .68, "sine", .05);
+    }
+
+    if (team === 1) {
+      // КВАНТ: ғарыштық толқын және таза сыңғыр.
+      note(120, .85, 0, "sine", .09, 650);
+      note(392, .85, .15, "sine", .045);
+      note(784, .85, .38, "sine", .055);
+      note(1175, .7, .6, "sine", .035);
+    }
+
+    if (team === 2) {
+      // НОВА: жоғарылайтын жұлдыз әуені.
+      [523, 659, 784, 1047, 1319].forEach((frequency, i) => {
+        note(frequency, .75, i * .13, "sine", .055);
+        note(frequency * 2, .35, i * .13 + .05, "sine", .012);
+      });
+    }
+
+    if (history.length === 23) {
+      later(finale, 1550);
+    }
+  }
+
+  function finale() {
+    // Үш команданың ортақ салтанатты финалы.
+    const melody = [523, 659, 784, 1047, 988, 1047];
+
+    melody.forEach((frequency, i) => {
+      note(frequency, .6, i * .32, "triangle", .05);
+    });
+
+    [262, 330, 392, 523].forEach(frequency => {
+      note(frequency, 1.8, 2.05, "sine", .035);
+    });
+  }
+
+  // Дыбыс пайдаланушы батырманы басқанда іске қосылады.
+  $("scanButton").addEventListener("click", openAudio);
+
+  $("soundButton").addEventListener("click", () => {
+    if (!sound) {
+      stopAudio();
+    } else {
+      openAudio();
+    }
+  });
+
+  $("undoButton").addEventListener("click", stopAudio);
+
+  $("resetButton").addEventListener("click", () => {
+    if (history.length === 0) stopAudio();
+  });
+
+  // Ойын анимациясының нақты басталуы мен аяқталуын бақылаймыз.
+  const observer = new MutationObserver(() => {
+    const isScanning = $("scanner").classList.contains("scanning");
+
+    if (isScanning && !scanning) {
+      scanning = true;
+      scanMusic();
+    } else if (!isScanning && scanning) {
+      scanning = false;
+      const last = history[history.length - 1];
+
+      if (last) revealMusic(last.team);
+    }
+  });
+
+  observer.observe($("scanner"), {
+    attributes: true,
+    attributeFilter: ["class"]
+  });
+
+  window.addEventListener("pagehide", stopAudio);
+})();
+</script>
 </body>
 </html>
