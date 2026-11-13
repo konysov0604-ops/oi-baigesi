@@ -1026,5 +1026,232 @@ window.addEventListener("pagehide", () => {
 
 render();
 </script>
+  <script>
+(() => {
+  let musicContext;
+  let musicEnabled = true;
+  let activeSounds = [];
+  let wasRunning = false;
+  let lastSecond = -1;
+  let nextBeat = 0;
+  let melodyStep = 0;
+
+  // Музыканы қосу және өшіру батырмасы.
+  const musicButton = document.createElement("button");
+  musicButton.className = "ghost";
+  musicButton.textContent = "♫ Әуен: қосулы";
+  musicButton.setAttribute("aria-pressed", "true");
+  document.querySelector("footer").appendChild(musicButton);
+
+  function unlockAudio() {
+    if (!musicEnabled) return;
+
+    try {
+      const Audio = window.AudioContext ||
+        window.webkitAudioContext;
+
+      if (!Audio) return;
+      if (!musicContext) musicContext = new Audio();
+
+      musicContext.resume().catch(() => {});
+    } catch (error) {}
+  }
+
+  // Браузер дыбысқа батырма басылғаннан кейін рұқсат береді.
+  document.addEventListener("click", event => {
+    if (event.target.closest("button")) unlockAudio();
+  }, true);
+
+  function stopSounds() {
+    activeSounds.forEach(node => {
+      try { node.stop(); } catch (error) {}
+    });
+    activeSounds = [];
+  }
+
+  function playNote(
+    frequency,
+    duration = .7,
+    delay = 0,
+    volume = .025,
+    type = "sine"
+  ) {
+    if (
+      !musicEnabled ||
+      !musicContext ||
+      musicContext.state !== "running" ||
+      document.hidden
+    ) return;
+
+    const start = musicContext.currentTime + delay;
+    const oscillator = musicContext.createOscillator();
+    const envelope = musicContext.createGain();
+
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+
+    envelope.gain.setValueAtTime(0, start);
+    envelope.gain.linearRampToValueAtTime(
+      volume, start + .025
+    );
+    envelope.gain.exponentialRampToValueAtTime(
+      .0001, start + duration
+    );
+
+    oscillator.connect(envelope);
+    envelope.connect(musicContext.destination);
+
+    oscillator.start(start);
+    oscillator.stop(start + duration + .04);
+    activeSounds.push(oscillator);
+
+    oscillator.onended = () => {
+      oscillator.disconnect();
+      envelope.disconnect();
+      activeSounds = activeSounds.filter(
+        sound => sound !== oscillator
+      );
+    };
+  }
+
+  // Жұмсақ электронды фон.
+  const melody = [
+    440, 523.25, 659.25, 587.33,
+    440, 392, 523.25, 659.25
+  ];
+
+  function thinkingMusic() {
+    const frequency = melody[melodyStep % melody.length];
+
+    playNote(frequency, 1.1, 0, .018);
+    playNote(frequency / 2, 1.3, 0, .018);
+    playNote(frequency * 2, .55, .22, .006);
+
+    melodyStep++;
+  }
+
+  // Командалардың жеңіс әуендері.
+  function teamVictory(team) {
+    stopSounds();
+
+    const tunes = [
+      [440, 660, 880],
+      [392, 587.33, 783.99],
+      [523.25, 659.25, 1046.5]
+    ];
+
+    tunes[team].forEach((frequency, index) => {
+      playNote(
+        frequency,
+        .5,
+        index * .14,
+        .045,
+        team === 0 ? "triangle" : "sine"
+      );
+    });
+  }
+
+  document.querySelectorAll(".award").forEach(button => {
+    button.addEventListener("click", () => {
+      const team = Number(button.dataset.team);
+
+      // Ұпай қосылғанда ғана ойнайды, қайтарғанда ойнамайды.
+      if (
+        state.phase === "review" &&
+        state.revealed[state.index] &&
+        state.awards[state.index][team]
+      ) {
+        teamVictory(team);
+      }
+    });
+  });
+
+  musicButton.addEventListener("click", () => {
+    musicEnabled = !musicEnabled;
+
+    musicButton.textContent =
+      "♫ Әуен: " + (musicEnabled ? "қосулы" : "өшірулі");
+
+    musicButton.setAttribute(
+      "aria-pressed", String(musicEnabled)
+    );
+
+    if (!musicEnabled) {
+      stopSounds();
+    } else {
+      unlockAudio();
+      nextBeat = 0;
+    }
+  });
+
+  // Сұрақ оқылғанда, таймер кідіргенде және бет жасырылғанда
+  // әуен тоқтайды.
+  const musicClock = setInterval(() => {
+    const running =
+      state.phase === "play" &&
+      Boolean(clock) &&
+      !reading &&
+      !paused &&
+      !document.hidden;
+
+    if (!running) {
+      if (wasRunning) {
+        stopSounds();
+
+        // Уақыт біткендегі қысқа белгі.
+        if (
+          questionExpired &&
+          state.phase === "play" &&
+          !document.hidden
+        ) {
+          playNote(523.25, .25, 0, .04);
+          playNote(392, .5, .22, .035);
+        }
+      }
+
+      wasRunning = false;
+      lastSecond = -1;
+      nextBeat = 0;
+      return;
+    }
+
+    if (!wasRunning) {
+      stopSounds();
+      melodyStep = 0;
+      nextBeat = 0;
+      lastSecond = -1;
+    }
+
+    wasRunning = true;
+    const second = Math.ceil(left);
+
+    // Соңғы 5 секундта фон тоқтап, анық белгі естіледі.
+    if (second <= 5 && second > 0) {
+      if (lastSecond !== second) {
+        stopSounds();
+        playNote(700 + (5 - second) * 65, .13, 0, .035);
+      }
+    } else if (performance.now() >= nextBeat) {
+      thinkingMusic();
+      nextBeat = performance.now() + 1500;
+    }
+
+    lastSecond = second;
+  }, 100);
+
+  // Оқу басталғанда жеңіс әуені де дереу тоқтайды.
+  $("read").addEventListener("click", stopSounds, true);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopSounds();
+  });
+
+  window.addEventListener("pagehide", () => {
+    clearInterval(musicClock);
+    stopSounds();
+    if (musicContext) musicContext.close().catch(() => {});
+  });
+})();
+</script>
 </body>
 </html>
