@@ -651,6 +651,7 @@ audio = new Audio(`q${state.index+1}.mp3.mp3?v=2`);
 audio.muted = false;
 audio.volume = 1;
 audio.playbackRate = 1;
+  audio.onended = () => {
     if (id === voiceId) beginThinking();
   };
   audio.onerror = () => deviceVoice(id);
