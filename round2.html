@@ -648,14 +648,20 @@ function demoHTML(type) {
     </a>
   </p>`;
 
-  if (type === "river") return `
-    <div class="demo-label">Ніл аңғарының шартты көрінісі</div>
-    <div class="river-scene">
-      <div class="river"></div>
-      <div class="bank left">🌾 Құнарлы жер<br>🌱 Егіншілік</div>
-      <div class="bank right">⛵ Қатынас<br>🏘 Елді мекендер</div>
-      <div class="river-title">НІЛ ӨЗЕНІ</div>
-    </div>`;
+if (type === "river") return `
+  <iframe
+    src="nile.html"
+    title="Ніл аңғарының интерактивті панорамасы"
+    loading="lazy"
+    style="display:block;width:100%;height:850px;
+           border:0;border-radius:15px;">
+  </iframe>
+  <p style="text-align:center;">
+    <a href="nile.html" target="_blank"
+       rel="noopener" style="color:#ffd88b;">
+      Панораманы жеке терезеде ашу ↗
+    </a>
+  </p>`;
 
   return `
     <div class="demo-label">Бояуларды араластырудың дәстүрлі үлгісі</div>
