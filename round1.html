@@ -646,8 +646,8 @@ $("read").onclick = () => {
   watchdog = setTimeout(() => voiceFailure(id),60000);
 
   // q1.mp3 ... q9.mp3 файлдары жүктелсе, солар оқылады.
-  audio = new Audio(`q${state.index+1}.mp3`);
-  audio.onended = () => {
+  
+  auaudio = new Audio(`q${state.index+1}.mp3.mp3`);dio.onended = () => {
     if (id === voiceId) beginThinking();
   };
   audio.onerror = () => deviceVoice(id);
