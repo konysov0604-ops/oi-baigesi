@@ -2,846 +2,601 @@
 <html lang="kk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ой импульсі — 1-тур</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ой импульсі — ауызша жарыс</title>
 <style>
-* { box-sizing: border-box; }
-
-:root {
-  --gold: #ffd88b;
-  --cream: #fff3dc;
-  --line: #d7a04e66;
+*{box-sizing:border-box}
+:root{--gold:#ffd88b;--cream:#fff3dc}
+body{
+  margin:0;min-height:100vh;color:var(--cream);
+  font-family:"Segoe UI",Arial,sans-serif;
+  background:linear-gradient(#220a0699,#220a06dd),
+  url("background.png.png") center/cover fixed;
+  background-color:#301007
 }
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  color: var(--cream);
-  font-family: "Segoe UI", Arial, sans-serif;
-  background:
-    linear-gradient(#220a06a6, #220a06d9),
-    url("background.png.png") center / cover fixed;
-  background-color: #301007;
+button,a{-webkit-tap-highlight-color:transparent}
+button{font:inherit;cursor:pointer}
+button:disabled{opacity:.38;cursor:default}
+button:focus-visible,a:focus-visible{
+  outline:3px solid white;outline-offset:4px
 }
-
-button, a { -webkit-tap-highlight-color: transparent; }
-
-button {
-  font: inherit;
-  cursor: pointer;
+main{width:min(1180px,94%);margin:auto;padding:24px 0}
+header{
+  display:flex;justify-content:space-between;
+  align-items:center;flex-wrap:wrap;gap:15px;
+  padding-bottom:20px;border-bottom:1px solid #d7a04e66
 }
-
-button:disabled {
-  opacity: .4;
-  cursor: default;
+a{color:var(--gold)}
+.brand{text-decoration:none;font-weight:800;letter-spacing:2px}
+h1{margin:0;font-size:clamp(21px,3vw,34px);color:var(--gold)}
+.stage{
+  display:grid;grid-template-columns:210px 1fr;
+  gap:20px;margin-top:24px
 }
-
-button:focus-visible, a:focus-visible {
-  outline: 3px solid white;
-  outline-offset: 4px;
+.panel{
+  border:1px solid #d7a04e66;border-radius:22px;
+  background:linear-gradient(140deg,#512b20cc,#20100eee);
+  padding:25px
 }
-
-main {
-  width: min(1200px, 94%);
-  margin: auto;
-  padding: 25px 0;
+.host{text-align:center;padding:25px 16px}
+.orb{
+  width:145px;height:145px;margin:5px auto 22px;
+  display:grid;place-items:center;border-radius:50%;
+  border:2px solid #e8ab4c;
+  background:radial-gradient(circle,#b96e2255,#200b07);
+  box-shadow:0 0 35px #ffb83444,inset 0 0 30px #ffaa2233;
+  font-size:65px;color:var(--gold)
 }
-
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 15px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--line);
+.speaking{animation:pulse .7s infinite alternate}
+.host h2{font-size:15px;letter-spacing:2px;color:var(--gold)}
+.host p{font-size:12px;line-height:1.7;color:#e7cba9}
+.host button{width:100%;margin-top:9px}
+.primary,.ghost,.correct,.wrong{
+  padding:13px 18px;border-radius:12px;font-weight:700
 }
-
-.brand {
-  text-decoration: none;
-  color: var(--gold);
-  font-weight: 800;
-  letter-spacing: 2px;
+.primary{
+  background:linear-gradient(135deg,#ffe4a2,#e3a038);
+  border:1px solid #ffe4a5;color:#391b09
 }
-
-h1 {
-  margin: 0;
-  font-size: clamp(21px, 3vw, 34px);
-  color: var(--gold);
+.ghost{background:#2b120dbb;color:#f2d3a2;border:1px solid #b3864c88}
+.correct{background:#254a31;color:#d7ffbf;border:1px solid #a2d28a}
+.wrong{background:#552923;color:#ffdbd2;border:1px solid #c68477}
+.question-layout{
+  display:grid;grid-template-columns:1fr 140px;
+  align-items:center;gap:24px
 }
-
-.counter {
-  color: #eed1a2;
-  font-size: 15px;
+.subject{
+  display:inline-block;padding:8px 15px;border-radius:30px;
+  border:1px solid #e9b45d88;color:var(--gold);font-size:13px
 }
-
-.stage {
-  display: grid;
-  grid-template-columns: 250px 1fr;
-  gap: 20px;
-  margin-top: 24px;
+.question{
+  font-size:clamp(24px,3vw,36px);
+  line-height:1.45;margin:22px 0;font-weight:700
 }
-
-.panel {
-  border: 1px solid var(--line);
-  border-radius: 22px;
-  background: linear-gradient(140deg, #512b20c9, #20100ee8);
-  box-shadow: 0 15px 45px #0002;
+.hint{font-size:14px;line-height:1.7;color:#dfc19b}
+.timer{
+  width:130px;height:130px;border:3px solid #edba67;
+  border-radius:50%;display:grid;align-content:center;
+  text-align:center;background:#30150e
 }
-
-.host {
-  padding: 25px 16px;
-  text-align: center;
+.timer b{font-size:52px;color:var(--gold);font-variant-numeric:tabular-nums}
+.timer span{font-size:11px;color:#dfbd8c}
+.answer{
+  margin-top:20px;padding:18px;border-radius:13px;
+  border:1px solid #d8b36c;background:#82601c25;line-height:1.7
 }
-
-.orb {
-  width: 160px;
-  height: 160px;
-  margin: 0 auto 22px;
-  position: relative;
-  display: grid;
-  place-items: center;
-  border: 2px solid #e8ab4c;
-  border-radius: 50%;
-  background: radial-gradient(circle, #b96e2244, #200b07);
-  box-shadow: 0 0 35px #ffb83433, inset 0 0 30px #ffaa2244;
+.answer strong{display:block;font-size:25px;color:#ffe1a1}
+.answer p{margin:7px 0 0}
+.controls,.judging{
+  display:flex;flex-wrap:wrap;gap:10px;margin-top:18px
 }
-
-.orb::before {
-  content: "";
-  position: absolute;
-  inset: -9px;
-  border: 2px solid transparent;
-  border-top-color: #ffe0a0;
-  border-bottom-color: #b9782b;
-  border-radius: 50%;
-  animation: orbit 8s linear infinite;
+.banner{
+  padding:16px 20px;margin-top:20px;border:1px solid #d7a04e66;
+  border-radius:12px;background:#32160ddd;line-height:1.7
 }
-
-.wave {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  height: 65px;
+.teams{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+.team{
+  --accent:#ffd26c;padding:18px;border-radius:18px;
+  background:#25130eee;border:1px solid var(--accent);
+  text-align:center
 }
-
-.wave i {
-  display: block;
-  width: 5px;
-  height: 18px;
-  border-radius: 5px;
-  background: var(--gold);
-  box-shadow: 0 0 10px #ffbc49;
+.team:nth-child(2){--accent:#6be5f6}
+.team:nth-child(3){--accent:#d7a1ff}
+.team.selected{box-shadow:0 0 28px var(--accent);transform:translateY(-4px)}
+.team.winner{background:#314124ee}
+.team img{width:90px;height:95px;object-fit:contain}
+.team h2{font-size:19px;color:var(--accent);margin:10px 0}
+.score{font-size:32px;font-weight:800;margin:8px 0 14px}
+.score small{font-size:13px;font-weight:400}
+.choose{
+  width:100%;padding:12px 6px;border-radius:10px;
+  background:#ffffff0b;color:var(--accent);
+  border:1px solid var(--accent);font-weight:700
 }
-
-.wave i:nth-child(2n) { height: 35px; }
-.wave i:nth-child(3n) { height: 55px; }
-
-.speaking .wave i {
-  animation: wave .55s ease-in-out infinite alternate;
+footer{
+  margin-top:24px;display:flex;justify-content:space-between;
+  align-items:center;gap:12px;flex-wrap:wrap;font-size:12px
 }
-
-.speaking .wave i:nth-child(2n) { animation-delay: .2s; }
-.speaking .wave i:nth-child(3n) { animation-delay: .35s; }
-
-.host h2 {
-  font-size: 17px;
-  letter-spacing: 2px;
-  color: var(--gold);
+[hidden]{display:none!important}
+@keyframes pulse{to{box-shadow:0 0 60px #ffb83488;transform:scale(1.04)}}
+@media(max-width:750px){
+  .stage{grid-template-columns:1fr}
+  .host{padding:15px}
+  .orb{width:80px;height:80px;font-size:40px;margin:0 auto 12px}
+  .host button{width:auto;font-size:12px}
+  .question-layout{grid-template-columns:1fr}
+  .timer{width:90px;height:90px}
+  .timer b{font-size:34px}
+  .teams{gap:7px}
+  .team{padding:12px 5px}
+  .team img{width:60px;height:65px}
+  .team h2{font-size:12px}
+  .score{font-size:25px}
+  .choose{font-size:11px}
 }
-
-.voice-status {
-  min-height: 60px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #e7cba9;
-}
-
-.ghost, .primary {
-  border-radius: 12px;
-  padding: 13px 18px;
-  font-weight: 700;
-}
-
-.ghost {
-  background: #2b120dbb;
-  color: #f2d3a2;
-  border: 1px solid #b3864c88;
-}
-
-.primary {
-  border: 1px solid #ffe4a5;
-  background: linear-gradient(135deg, #ffe4a2, #e3a038);
-  color: #391b09;
-}
-
-.host button {
-  width: 100%;
-  margin-top: 9px;
-}
-
-.question-panel {
-  min-height: 340px;
-  padding: 28px;
-}
-
-.question-layout {
-  display: grid;
-  grid-template-columns: 1fr 145px;
-  gap: 25px;
-  align-items: center;
-}
-
-.subject {
-  display: inline-block;
-  padding: 8px 15px;
-  border: 1px solid #e9b45d88;
-  border-radius: 30px;
-  color: var(--gold);
-  background: #9b591833;
-  font-size: 13px;
-}
-
-.question {
-  font-size: clamp(23px, 3vw, 36px);
-  line-height: 1.45;
-  margin: 23px 0;
-  font-weight: 700;
-}
-
-.instruction {
-  border-left: 3px solid #e5a547;
-  padding-left: 12px;
-  color: #dfc19b;
-  line-height: 1.7;
-  font-size: 14px;
-}
-
-.timer-area { text-align: center; }
-
-.timer {
-  --angle: 360deg;
-  width: 138px;
-  height: 138px;
-  padding: 5px;
-  border-radius: 50%;
-  background: conic-gradient(
-    #ffd889 var(--angle), #ffffff15 0
-  );
-  margin: auto;
-}
-
-.timer-inner {
-  height: 100%;
-  border-radius: 50%;
-  background: #30150e;
-  display: grid;
-  align-content: center;
-}
-
-.timer b {
-  font-size: 56px;
-  color: var(--gold);
-  font-variant-numeric: tabular-nums;
-}
-
-.timer span { font-size: 12px; color: #dfbd8c; }
-
-.timer-hint {
-  font-size: 11px;
-  color: #d9bb95;
-  line-height: 1.6;
-  margin-top: 13px;
-}
-
-.answer {
-  padding: 18px;
-  border: 1px solid #d8b36c;
-  border-radius: 13px;
-  background: #82601c25;
-  line-height: 1.7;
-  margin-top: 22px;
-}
-
-.answer strong {
-  display: block;
-  font-size: 25px;
-  color: #ffe1a1;
-}
-
-.answer p { margin: 5px 0 0; color: #e3d2b9; }
-
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.banner {
-  margin-top: 20px;
-  padding: 15px 18px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: #32160dc9;
-  color: #efd4ab;
-  line-height: 1.7;
-}
-
-.teams {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.team {
-  --accent: #ffd26c;
-  padding: 18px;
-  display: grid;
-  grid-template-columns: 85px 1fr;
-  align-items: center;
-  gap: 15px;
-  border: 1px solid var(--accent);
-  border-radius: 18px;
-  background: #25130ee8;
-}
-
-.team:nth-child(2) { --accent: #6be5f6; }
-.team:nth-child(3) { --accent: #d7a1ff; }
-
-.team img {
-  width: 85px;
-  height: 100px;
-  object-fit: contain;
-  filter: drop-shadow(0 0 12px #ffffff15);
-}
-
-.team h2 {
-  margin: 0;
-  font-size: 18px;
-  letter-spacing: 1px;
-  color: var(--accent);
-}
-
-.score {
-  margin: 8px 0 10px;
-  font-size: 27px;
-  font-weight: 800;
-}
-
-.score small { font-size: 13px; font-weight: 400; }
-
-.award {
-  padding: 8px 11px;
-  border-radius: 8px;
-  border: 1px solid var(--accent);
-  background: #ffffff0b;
-  color: var(--accent);
-  font-size: 12px;
-}
-
-.award.selected {
-  background: var(--accent);
-  color: #231409;
-}
-
-footer {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: center;
-  margin-top: 22px;
-  color: #cdb18d;
-  font-size: 12px;
-}
-
-footer a { color: var(--gold); }
-
-[hidden] { display: none !important; }
-
-@keyframes orbit {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes wave {
-  to { transform: scaleY(.35); }
-}
-
-@media (max-width: 900px) {
-  .stage { grid-template-columns: 190px 1fr; }
-  .question-layout { grid-template-columns: 1fr; }
-  .timer-area {
-    display: flex;
-    gap: 18px;
-    align-items: center;
-    text-align: left;
-  }
-  .timer { width: 90px; height: 90px; margin: 0; flex-shrink: 0; }
-  .timer b { font-size: 35px; }
-  .team { grid-template-columns: 1fr; text-align: center; }
-  .team img { margin: auto; }
-}
-
-@media (max-width: 600px) {
-  .stage { grid-template-columns: 1fr; }
-  .host { padding: 18px; }
-  .orb { width: 95px; height: 95px; margin-bottom: 15px; }
-  .host h2 { margin: 10px 0; }
-  .voice-status { min-height: 0; }
-  .host button { width: auto; font-size: 12px; }
-  .question-panel { padding: 20px; }
-  .teams { gap: 7px; }
-  .team { padding: 12px 5px; gap: 7px; }
-  .team h2 { font-size: 12px; }
-  .team img { width: 60px; height: 65px; }
-  .score { font-size: 23px; }
-  .score small { display: block; }
-  .award { font-size: 10px; padding: 8px 5px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before { animation: none !important; }
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
 }
 </style>
 </head>
-
 <body>
 <main>
-  <header>
-    <a href="index.html" class="brand">ОЙ БӘЙГЕСІ</a>
-    <h1>1-ТУР · ОЙ ИМПУЛЬСІ</h1>
-    <span class="counter" id="counter">Сұрақ 1 / 9</span>
-  </header>
+<header>
+  <a class="brand" href="index.html">ОЙ БӘЙГЕСІ</a>
+  <h1>1-ТУР · ОЙ ИМПУЛЬСІ</h1>
+  <span id="counter"></span>
+</header>
 
-  <div class="stage">
-    <aside class="panel host">
-      <div class="orb" id="orb" aria-hidden="true">
-        <div class="wave">
-          <i></i><i></i><i></i><i></i><i></i>
-          <i></i><i></i><i></i><i></i>
+<div class="stage">
+  <aside class="panel host">
+    <div class="orb" id="orb" aria-hidden="true">◎</div>
+    <h2>ЖИ-ХАБАРШЫ</h2>
+    <p id="voiceStatus" role="status"></p>
+    <button class="primary" id="read">▶ Сұрақты тыңдау</button>
+    <button class="ghost" id="start">Таймерді бастау</button>
+  </aside>
+
+  <section class="panel">
+    <div class="question-layout">
+      <div>
+        <span class="subject" id="subject"></span>
+        <div class="question" id="question"></div>
+        <div class="hint" id="hint">
+          Бірінші белгі берген топты жүргізуші таңдайды.
         </div>
       </div>
-      <h2>ЖИ-ХАБАРШЫ</h2>
-      <p class="voice-status" id="voiceStatus" role="status">
-        Қазақша дауыс тексерілуде…
-      </p>
-      <button class="primary" id="read">▶ Сұрақты тыңдау</button>
-      <button class="ghost" id="manual">Таймерді бастау</button>
-    </aside>
-
-    <section>
-      <div class="panel question-panel">
-        <div class="question-layout">
-          <div>
-            <span class="subject" id="subject"></span>
-            <div class="question" id="question"></div>
-            <div class="instruction" id="instruction">
-              Жауап парағындағы тиісті нөмірге
-              бір ортақ жауап жазыңдар.
-            </div>
-          </div>
-
-          <div class="timer-area" id="timerArea">
-            <div class="timer" id="timer">
-              <div class="timer-inner">
-                <b id="seconds">20</b>
-                <span>секунд</span>
-              </div>
-            </div>
-            <div class="timer-hint" id="timerHint">
-              Сұрақ оқылғаннан кейін басталады
-            </div>
-          </div>
-        </div>
-
-        <div class="answer" id="answer" hidden>
-          <strong id="answerText"></strong>
-          <p id="explanation"></p>
-        </div>
+      <div class="timer">
+        <b id="seconds">20</b>
+        <span id="timerLabel">ойлану уақыты</span>
       </div>
+    </div>
 
-      <div class="controls">
-        <button class="ghost" id="pause" disabled>Ⅱ Кідірту</button>
-        <button class="primary" id="next" disabled>
-          Келесі сұрақ →
-        </button>
-        <button class="primary" id="collect" hidden>
-          Парақтар жиналды — тексеруді бастау
-        </button>
-        <button class="primary" id="reveal" hidden>
-          Дұрыс жауапты ашу
-        </button>
-        <button class="ghost" id="previous" hidden>
-          ← Алдыңғы жауап
-        </button>
-      </div>
-    </section>
-  </div>
+    <div class="judging" id="judging" hidden>
+      <button class="correct" id="correct">✓ Дұрыс +10</button>
+      <button class="wrong" id="wrong">✕ Қате — басқа топ</button>
+    </div>
 
-  <div class="banner" id="banner" role="status">
-    Әр дұрыс жауап — 10 ұпай.
-    Дұрыс жауаптар парақтар жиналғаннан кейін ашылады.
-  </div>
+    <div class="answer" id="answer" hidden>
+      <strong id="answerText"></strong>
+      <p id="explanation"></p>
+    </div>
 
-  <section class="teams" aria-label="Команда ұпайлары">
-    <article class="team">
-      <img src="impuls.png.png" alt="Импульс белгісі">
-      <div>
-        <h2>ИМПУЛЬС</h2>
-        <div class="score"><b id="score0">0</b> <small>ұпай</small></div>
-        <button class="award" data-team="0" disabled>+10 ұпай</button>
-      </div>
-    </article>
-
-    <article class="team">
-      <img src="kvant.png.png" alt="Квант белгісі">
-      <div>
-        <h2>КВАНТ</h2>
-        <div class="score"><b id="score1">0</b> <small>ұпай</small></div>
-        <button class="award" data-team="1" disabled>+10 ұпай</button>
-      </div>
-    </article>
-
-    <article class="team">
-      <img src="nova.png.png" alt="Нова белгісі">
-      <div>
-        <h2>НОВА</h2>
-        <div class="score"><b id="score2">0</b> <small>ұпай</small></div>
-        <button class="award" data-team="2" disabled>+10 ұпай</button>
-      </div>
-    </article>
+    <div class="controls">
+      <button class="ghost" id="pause" disabled>Ⅱ Кідірту</button>
+      <button class="ghost" id="reveal">Жауапты ашу</button>
+      <button class="primary" id="next">Келесі сұрақ →</button>
+      <button class="ghost" id="undo" hidden>↶ Осы жауапты қайтару</button>
+    </div>
   </section>
+</div>
 
-  <footer>
-    <a href="teams.html">← Командалар</a>
-    <span>1-турдағы ең жоғары ұпай: 90</span>
-    <button class="ghost" id="reset">Турды қайта бастау</button>
-  </footer>
+<div class="banner" id="banner" role="status" aria-live="polite"></div>
+
+<section class="teams" aria-label="Командалар">
+  <article class="team" id="team0">
+    <img src="impuls.png.png" alt="Импульс">
+    <h2>ИМПУЛЬС</h2>
+    <div class="score"><b id="score0">0</b> <small>ұпай</small></div>
+    <button class="choose" data-team="0">Бірінші жауап береді</button>
+  </article>
+  <article class="team" id="team1">
+    <img src="kvant.png.png" alt="Квант">
+    <h2>КВАНТ</h2>
+    <div class="score"><b id="score1">0</b> <small>ұпай</small></div>
+    <button class="choose" data-team="1">Бірінші жауап береді</button>
+  </article>
+  <article class="team" id="team2">
+    <img src="nova.png.png" alt="Нова">
+    <h2>НОВА</h2>
+    <div class="score"><b id="score2">0</b> <small>ұпай</small></div>
+    <button class="choose" data-team="2">Бірінші жауап береді</button>
+  </article>
+</section>
+
+<footer>
+  <a href="teams.html">← Командалар</a>
+  <span>Дұрыс жауап: +10 · Қате жауап: 0</span>
+  <button class="ghost" id="music">♫ Әуен: қосулы</button>
+  <button class="ghost" id="reset">Турды қайта бастау</button>
+</footer>
 </main>
 
 <script>
 const QUESTIONS = [
   {
-    subject: "Математика",
-    text: "Мен 1 минутта 120 сөз оқимын. Осы жылдамдықпен 30 секундта қанша сөз оқимын?",
-    answer: "60 сөз",
-    explanation: "30 секунд — бір минуттың жартысы. 120 : 2 = 60."
+    subject:"Математика",
+    text:"Мен 1 минутта 120 сөз оқимын. Осы жылдамдықпен 30 секундта қанша сөз оқимын?",
+    answer:"60 сөз",
+    explanation:"30 секунд — бір минуттың жартысы. 120 : 2 = 60."
   },
   {
-    subject: "Қазақ тілі",
-    text: "«Білімді оқушы» тіркесіндегі «білімді» сөзі қай сөз табына жатады?",
-    answer: "Сын есім",
-    explanation: "«Қандай оқушы?» деген сұраққа жауап беріп, оқушының белгісін білдіреді."
+    subject:"Қазақ тілі",
+    text:"«Білімді оқушы» тіркесіндегі «білімді» сөзі қай сөз табына жатады?",
+    answer:"Сын есім",
+    explanation:"Қандай оқушы? Білімді оқушы. Заттың белгісін білдіреді."
   },
   {
-    subject: "Жаратылыстану · Биология",
-    text: "Өсімдік жапырағы жарықта фотосинтез кезінде ауаға қандай газ бөледі?",
-    answer: "Оттек",
-    explanation: "Фотосинтез кезінде өсімдік жарық энергиясын пайдаланады, нәтижесінде оттек бөлінеді."
+    subject:"Жаратылыстану · Биология",
+    text:"Өсімдік жапырағы жарықта фотосинтез кезінде ауаға қандай газ бөледі?",
+    answer:"Оттек",
+    explanation:"Фотосинтез нәтижесінде оттек бөлінеді."
   },
   {
-    subject: "Қазақстан тарихы",
-    text: "Қазақ хандығының негізін қалаған екі ханды атаңдар.",
-    answer: "Керей мен Жәнібек",
-    explanation: "Қазақ хандығының негізін қалаушылар — Керей хан мен Жәнібек хан."
+    subject:"Қазақстан тарихы",
+    text:"Қазақ хандығының негізін қалаған екі ханды атаңдар.",
+    answer:"Керей мен Жәнібек",
+    explanation:"Қазақ хандығының негізін қалаушылар — Керей хан мен Жәнібек хан."
   },
   {
-    subject: "География",
-    text: "Жер шарындағы ауданы ең үлкен мұхит қалай аталады?",
-    answer: "Тынық мұхиты",
-    explanation: "Тынық мұхиты — Жердегі ең үлкен мұхит."
+    subject:"География",
+    text:"Жер шарындағы ауданы ең үлкен мұхит қалай аталады?",
+    answer:"Тынық мұхиты",
+    explanation:"Тынық мұхиты — ауданы бойынша ең үлкен мұхит."
   },
   {
-    subject: "Информатика",
-    text: "Бірінші қадам — кітапты ашу. Екінші қадам — мәтінді оқу. Үшінші қадам — сұраққа жауап беру. Осындай реттелген әрекеттер тізбегі қалай аталады?",
-    answer: "Алгоритм",
-    explanation: "Алгоритм — мақсатқа жеткізетін реттелген, нақты әрекеттер тізбегі."
+    subject:"Информатика",
+    text:"Мақсатқа жеткізетін реттелген әрекеттер тізбегі қалай аталады?",
+    answer:"Алгоритм",
+    explanation:"Алгоритм — мақсатқа жеткізетін нақты әрекеттер тізбегі."
   },
   {
-    subject: "Ағылшын тілі",
-    text: "Ағылшын тіліндегі «book» сөзін қазақшаға аударыңдар.",
-    answer: "Кітап",
-    explanation: "Book сөзі қазақ тілінде «кітап» дегенді білдіреді."
+    subject:"Ағылшын тілі",
+    text:"Ағылшын тіліндегі «book» сөзін қазақшаға аударыңдар.",
+    answer:"Кітап",
+    explanation:"Book сөзі «кітап» дегенді білдіреді."
   },
   {
-    subject: "Музыка · Ұлттық мәдениет",
-    text: "Екі ішекті, шертіп ойналатын қазақтың ұлттық музыкалық аспабын атаңдар.",
-    answer: "Домбыра",
-    explanation: "Домбыра — қазақтың екі ішекті ұлттық музыкалық аспабы."
+    subject:"Музыка · Ұлттық мәдениет",
+    text:"Екі ішекті, шертіп ойналатын қазақтың ұлттық музыкалық аспабын атаңдар.",
+    answer:"Домбыра",
+    explanation:"Домбыра — қазақтың екі ішекті ұлттық аспабы."
   },
   {
-    subject: "Дене шынықтыру",
-    text: "Классикалық волейболда бір командадан алаңда бір мезетте неше ойыншы ойнайды?",
-    answer: "6 ойыншы",
-    explanation: "Классикалық волейболда әр командадан алаңда алты ойыншы болады."
+    subject:"Дене шынықтыру",
+    text:"Классикалық волейболда бір командадан алаңда бір мезетте неше ойыншы ойнайды?",
+    answer:"6 ойыншы",
+    explanation:"Әр командадан алаңда алты ойыншы болады."
   }
 ];
 
-// Қазақша MP3 дайын болса, осы атаулармен жүктеуге болады:
-// q1.mp3, q2.mp3, ... q9.mp3.
-// Файл болмаса, құрылғыдағы қазақша дауыс тексеріледі.
-const AUDIO_FILES = QUESTIONS.map((q, i) => `q${i + 1}.mp3`);
-
+const NAMES = ["ИМПУЛЬС","КВАНТ","НОВА"];
 const $ = id => document.getElementById(id);
-const STORAGE_KEY = "oi-baigesi-round1-v1";
+const KEY = "oi-baigesi-round1-oral-v1";
 
-let state = {
-  phase: "play",
-  index: 0,
-  awards: QUESTIONS.map(() => [false, false, false]),
-  revealed: QUESTIONS.map(() => false)
-};
+function fresh() {
+  return {
+    index:0,
+    done:false,
+    records:QUESTIONS.map(() => ({
+      winner:null, wrong:[], revealed:false, open:false
+    }))
+  };
+}
+
+let state = fresh();
 
 try {
-  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-  const validRows = Array.isArray(saved?.awards) &&
-    saved.awards.length === 9 &&
-    saved.awards.every(row =>
-      Array.isArray(row) && row.length === 3 &&
-      row.every(value => typeof value === "boolean")
-    );
-
-  const validRevealed = Array.isArray(saved?.revealed) &&
-    saved.revealed.length === 9 &&
-    saved.revealed.every(value => typeof value === "boolean");
-
-  if (
-    saved &&
-    ["play", "review", "done"].includes(saved.phase) &&
+  const saved = JSON.parse(localStorage.getItem(KEY));
+  const valid = saved &&
     Number.isInteger(saved.index) &&
     saved.index >= 0 && saved.index < 9 &&
-    validRows && validRevealed
-  ) state = saved;
-} catch (error) {}
+    typeof saved.done === "boolean" &&
+    Array.isArray(saved.records) &&
+    saved.records.length === 9 &&
+    saved.records.every(r =>
+      r && (r.winner === null || [0,1,2].includes(r.winner)) &&
+      Array.isArray(r.wrong) &&
+      r.wrong.every(t => [0,1,2].includes(t)) &&
+      new Set(r.wrong).size === r.wrong.length &&
+      typeof r.revealed === "boolean" &&
+      typeof r.open === "boolean"
+    );
+  if (valid) state = saved;
+} catch(error) {}
 
-let left = 20;
+let selected = null;
 let clock = null;
-let deadline = 0;
+let timerKind = null;
 let paused = false;
+let left = 20;
+let deadline = 0;
+let thinkingLeft = 20;
 let reading = false;
 let audio = null;
-let utterance = null;
-let runId = 0;
-let speechWatchdog = null;
-let voice = null;
-let questionExpired = false;
+let speech = null;
+let voiceId = 0;
+let watchdog = null;
+let audioContext;
+let musicEnabled = true;
+let sounds = [];
+let musicLoop = null;
+let musicStep = 0;
+let lastTick = -1;
+
+const record = () => state.records[state.index];
+const closed = () => record().revealed || record().winner !== null;
 
 function save() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (error) {
+  try { localStorage.setItem(KEY,JSON.stringify(state)); }
+  catch(error) {
     $("banner").textContent =
-      "Браузер сақтауға рұқсат бермеді. Ұпайларды жазып алыңыз.";
+      "Сақтау қолжетімсіз. Бетті жаппай, ұпайларды жазып алыңыз.";
   }
 }
 
-function findVoice() {
-  if (!("speechSynthesis" in window)) return null;
-  return speechSynthesis.getVoices().find(v =>
-    /^kk(?:[-_]|$)/i.test(v.lang)
-  ) || null;
+function total(team) {
+  return state.records.filter(r => r.winner === team).length * 10;
 }
 
-function updateVoice() {
-  voice = findVoice();
-
-  if (reading || state.phase !== "play") return;
-
-  $("voiceStatus").textContent = voice
-    ? "Қазақша дауыс қолжетімді. Сұрақты тыңдауға болады."
-    : "MP3 немесе қазақша дауыс болса оқылады. Дауыс болмаса, сұрақты оқып, таймерді қолмен бастаңыз.";
+function unlock() {
+  if (!musicEnabled) return;
+  try {
+    const Audio = window.AudioContext || window.webkitAudioContext;
+    if (!Audio) return;
+    if (!audioContext) audioContext = new Audio();
+    audioContext.resume().catch(() => {});
+  } catch(error) {}
 }
 
-if ("speechSynthesis" in window) {
-  speechSynthesis.addEventListener("voiceschanged", updateVoice);
+function note(frequency,duration=.4,delay=0,volume=.025) {
+  if (!musicEnabled || !audioContext ||
+      audioContext.state !== "running" || document.hidden) return;
+
+  const now = audioContext.currentTime + delay;
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+
+  oscillator.frequency.value = frequency;
+  gain.gain.setValueAtTime(0,now);
+  gain.gain.linearRampToValueAtTime(volume,now+.02);
+  gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
+
+  oscillator.connect(gain);
+  gain.connect(audioContext.destination);
+  oscillator.start(now);
+  oscillator.stop(now+duration+.04);
+  sounds.push(oscillator);
+
+  oscillator.onended = () => {
+    oscillator.disconnect();
+    gain.disconnect();
+    sounds = sounds.filter(s => s !== oscillator);
+  };
 }
 
-function clearClock() {
-  clearInterval(clock);
-  clock = null;
+function stopMusic() {
+  clearInterval(musicLoop);
+  musicLoop = null;
+  sounds.forEach(s => { try{s.stop();}catch(error){} });
+  sounds = [];
 }
+
+function startMusic() {
+  stopMusic();
+  if (!musicEnabled || timerKind !== "thinking") return;
+
+  const melody = [440,523,659,587,440,392,523,659];
+  function beat() {
+    if (!clock || paused || reading || left <= 5 ||
+        document.hidden) return;
+    const f = melody[musicStep++ % melody.length];
+    note(f,1.1,0,.015);
+    note(f/2,1.2,0,.015);
+  }
+
+  beat();
+  musicLoop = setInterval(beat,1500);
+}
+
+document.addEventListener("click",e => {
+  if (e.target.closest("button")) unlock();
+},true);
 
 function stopVoice() {
-  runId++;
-  clearTimeout(speechWatchdog);
-  speechWatchdog = null;
-
+  voiceId++;
+  clearTimeout(watchdog);
   if (audio) {
     audio.onended = null;
     audio.onerror = null;
     audio.pause();
     audio = null;
   }
-
   if ("speechSynthesis" in window) speechSynthesis.cancel();
-
-  utterance = null;
+  speech = null;
   reading = false;
   $("orb").classList.remove("speaking");
 }
 
-function score(team) {
-  return state.awards.reduce(
-    (sum, row) => sum + (row[team] ? 10 : 0), 0
-  );
+function stopClock() {
+  clearInterval(clock);
+  clock = null;
+  stopMusic();
 }
 
-function updateScores() {
-  document.querySelectorAll(".award").forEach(button => {
-    const team = Number(button.dataset.team);
-    const awarded = state.awards[state.index][team];
-    const available =
-      state.phase === "review" && state.revealed[state.index];
+function timerPaint() {
+  $("seconds").textContent = Math.max(0,Math.ceil(left));
+  $("timerLabel").textContent =
+    timerKind === "answer" ? "жауап беру уақыты" : "ойлану уақыты";
+}
 
-    $("score" + team).textContent = score(team);
-    button.disabled = !available;
-    button.classList.toggle("selected", awarded);
-    button.textContent = awarded ? "✓ +10 · Қайтару" : "+10 ұпай";
+function ui() {
+  const r = record();
+  const finished = state.done;
+
+  $("counter").textContent = finished
+    ? "Тур аяқталды" : `Сұрақ ${state.index+1} / 9`;
+
+  $("judging").hidden = selected === null || finished;
+  $("pause").disabled = !clock && !paused;
+  $("pause").textContent = paused ? "▶ Жалғастыру" : "Ⅱ Кідірту";
+
+  $("read").disabled = finished || reading ||
+    selected !== null || closed() || clock !== null || paused;
+
+  $("start").disabled = finished || selected !== null ||
+    closed() || clock !== null || paused;
+
+  $("reveal").disabled = finished || closed();
+  $("next").disabled = finished;
+  $("next").textContent = state.index === 8
+    ? "Турды аяқтау →" : "Келесі сұрақ →";
+
+  $("answer").hidden = !r.revealed || finished;
+  $("undo").hidden = finished ||
+    !(r.winner !== null || r.wrong.length > 0 || r.revealed);
+
+  document.querySelectorAll(".choose").forEach(button => {
+    const team = Number(button.dataset.team);
+    const failed = r.wrong.includes(team);
+
+    button.disabled = finished || reading || selected !== null ||
+      closed() || failed || !r.open;
+
+    button.textContent = r.winner === team
+      ? "✓ +10 ұпай"
+      : failed ? "Бұл сұраққа жауап берді"
+      : "Жауап беретін топ";
+
+    $("team"+team).classList.toggle("selected",selected === team);
+    $("team"+team).classList.toggle("winner",r.winner === team);
+    $("score"+team).textContent = total(team);
   });
 }
 
-function paintTimer() {
-  $("seconds").textContent = Math.ceil(left);
-  $("timer").style.setProperty(
-    "--angle", (left / 20 * 360) + "deg"
-  );
-}
-
-function render() {
-  clearClock();
+function show() {
+  stopClock();
   stopVoice();
+  selected = null;
   paused = false;
+  timerKind = null;
+  thinkingLeft = 20;
   left = 20;
-  questionExpired = false;
-  paintTimer();
+  lastTick = -1;
 
   const q = QUESTIONS[state.index];
-  const playing = state.phase === "play";
-  const reviewing = state.phase === "review";
-  const done = state.phase === "done";
-
-  $("counter").textContent = done
-    ? "Тур аяқталды"
-    : (reviewing ? "Тексеру " : "Сұрақ ") +
-      (state.index + 1) + " / 9";
-
-  $("subject").textContent = done ? "1-ТУР НӘТИЖЕСІ" : q.subject;
-  $("question").textContent = done
-    ? "Ой импульсі аяқталды!"
-    : q.text;
-
-  $("instruction").textContent = done
-    ? "Командалардың төмендегі ұпайларын қорытындылаңыз."
-    : playing
-      ? "Жауап парағындағы " + (state.index + 1) +
-        "-нөмірге бір ортақ жауап жазыңдар."
-      : "Парақтағы жауаптарды салыстырып, дұрыс жауап берген топтарға ұпай беріңіз.";
-
-  $("timerArea").hidden = !playing;
-  $("read").hidden = !playing;
-  $("manual").hidden = !playing;
-  $("read").disabled = false;
-  $("manual").disabled = false;
-  $("read").textContent = "▶ Сұрақты тыңдау";
-
-  $("pause").hidden = !playing;
-  $("pause").disabled = true;
-  $("pause").textContent = "Ⅱ Кідірту";
-
-  $("next").hidden = done;
-  $("next").disabled = playing;
-  $("next").textContent = reviewing
-    ? (state.index === 8 ? "Турды аяқтау ✓" : "Келесі жауап →")
-    : (state.index === 8 ? "Жауаптарды жинау →" : "Келесі сұрақ →");
-
-  $("collect").hidden = true;
-  $("previous").hidden = !reviewing || state.index === 0;
-
-  $("reveal").hidden = !reviewing;
-  $("reveal").disabled = state.revealed[state.index];
-
-  $("answer").hidden =
-    !reviewing || !state.revealed[state.index];
+  $("subject").textContent = state.done ? "ҚОРЫТЫНДЫ" : q.subject;
+  $("question").textContent = state.done
+    ? "Бірінші тур аяқталды!" : q.text;
   $("answerText").textContent = q.answer;
   $("explanation").textContent = q.explanation;
 
-  $("timerHint").textContent =
-    "Сұрақ оқылғаннан кейін басталады";
+  $("hint").textContent = state.done
+    ? "Үш команданың қорытынды ұпайы төменде көрсетілген."
+    : "Бірінші белгі берген топты жүргізуші таңдайды.";
 
-  $("banner").textContent = done
-    ? "1-тур аяқталды. Ұпайлар осы браузерде сақталды. Келесі турды бірге қосамыз."
-    : reviewing
-      ? "Әр топқа осы сұрақ үшін 10 ұпай беріледі. Қате басылса, сол батырмамен ұпайды қайтаруға болады."
-      : "Дұрыс жауаптар 9 сұрақ аяқталып, парақтар жиналғаннан кейін ғана ашылады.";
+  $("voiceStatus").textContent = state.done
+    ? "Білім • Бірлік • Жеңіс"
+    : "Сұрақты тыңдаңыз немесе жүргізуші оқып, таймерді бастасын.";
 
-  if (!playing) {
-    $("voiceStatus").textContent = done
-      ? "Білім • Бірлік • Жеңіс"
-      : "Жауап парақтарын тексеру кезеңі";
-  } else updateVoice();
+  $("banner").textContent = state.done
+    ? "Ұпайлар сақталды. Бұл турда 9 сұраққа барлығы 90 ұпай ойнатылды."
+    : record().winner !== null
+      ? `${NAMES[record().winner]} — дұрыс жауап! +10 ұпай.`
+      : closed()
+        ? "Жауап ашылды. Келесі сұраққа өтуге болады."
+        : record().open
+          ? "Сұрақ ашық. Топты таңдаңыз немесе таймерді қайта бастаңыз."
+          : "Сұрақ оқылғаннан кейін белгі беріңіздер. «Келесі сұрақ» батырмасы уақытты күтпейді.";
 
-  updateScores();
+  timerPaint();
+  ui();
 }
 
 function expire() {
-  clearClock();
+  const kind = timerKind;
+  stopClock();
+  paused = false;
   left = 0;
-  questionExpired = true;
-  paintTimer();
+  timerPaint();
 
-  $("pause").disabled = true;
-  $("manual").disabled = true;
-  $("read").disabled = true;
-  $("next").disabled = false;
+  if (kind === "answer") {
+    $("banner").textContent =
+      `${NAMES[selected]}: 5 секунд аяқталды. Жүргізуші айтылған жауапты бағалайды.`;
+  } else {
+    $("banner").textContent =
+      "20 секунд аяқталды. Белгі берген топ болса таңдаңыз немесе жауапты ашыңыз.";
+  }
 
-  $("timerHint").textContent = "Уақыт аяқталды!";
-  $("voiceStatus").textContent =
-    "Қаламды тоқтатыңдар. Жауаптарыңды өзгертпеңдер.";
-
-  $("banner").textContent = state.index === 8
-    ? "Соңғы сұрақ аяқталды. Енді үш топтың жауап парақтарын жинаңыз."
-    : "Уақыт аяқталды. Жүргізуші келесі сұрақты аша алады.";
+  note(523,.22,0,.035);
+  note(392,.4,.2,.03);
+  ui();
 }
 
 function tick() {
-  left = Math.max(0, (deadline - performance.now()) / 1000);
-  paintTimer();
+  left = Math.max(0,(deadline-performance.now())/1000);
+  if (timerKind === "thinking") thinkingLeft = left;
+  timerPaint();
+
+  const second = Math.ceil(left);
+  if (second > 0 && second <= 5 && lastTick !== second) {
+    if (timerKind === "thinking") stopMusic();
+    note(700+(5-second)*60,.12,0,.025);
+  }
+  lastTick = second;
+
   if (left <= 0) expire();
 }
 
-function beginTimer() {
-  if (state.phase !== "play" || questionExpired) return;
-
-  clearClock();
-  stopVoice();
-
-  deadline = performance.now() + left * 1000;
+function runTimer(seconds,kind) {
+  stopClock();
+  timerKind = kind;
+  left = seconds;
   paused = false;
-
-  $("read").disabled = true;
-  $("manual").disabled = true;
-  $("pause").disabled = false;
-  $("pause").textContent = "Ⅱ Кідірту";
-  $("timerHint").textContent = "Ақылдасып, жауапты жазыңдар";
-  $("voiceStatus").textContent = "Ойлануға 20 секунд.";
-  clock = setInterval(tick, 100);
-  tick();
+  lastTick = -1;
+  deadline = performance.now()+seconds*1000;
+  clock = setInterval(tick,100);
+  timerPaint();
+  startMusic();
+  ui();
 }
 
-function voiceFailure(id, message) {
-  if (id !== runId) return;
+function beginThinking() {
+  if (state.done || closed() || selected !== null) return;
 
   stopVoice();
-  $("read").disabled = false;
-  $("manual").disabled = false;
-  $("voiceStatus").textContent = message;
+  record().open = true;
+  thinkingLeft = 20;
+  save();
+  runTimer(20,"thinking");
+
+  $("voiceStatus").textContent = "Сұрақ оқылды. Жарыс басталды!";
+  $("banner").textContent =
+    "Бірінші белгі берген топты таңдаңыз — таймер тоқтайды.";
 }
 
-function speakWithDevice(id) {
-  if (id !== runId) return;
+function voiceFailure(id) {
+  if (id !== voiceId) return;
+  stopVoice();
+  $("voiceStatus").textContent =
+    "Қазақша аудио ойнатылмады. Сұрақты оқып, «Таймерді бастау» басыңыз.";
+  ui();
+}
+
+function deviceVoice(id) {
+  if (id !== voiceId) return;
+
+  // MP3 қатесі мен play қатесінің қатар келуінен қорғаныс.
+  if (speech) return;
 
   if (audio) {
     audio.onended = null;
@@ -850,408 +605,242 @@ function speakWithDevice(id) {
     audio = null;
   }
 
-  voice = findVoice();
-
-  if (!voice) {
-    voiceFailure(
-      id,
-      "Қазақша дауыс табылмады. Сұрақты оқып, «Таймерді бастау» батырмасын басыңыз."
-    );
+  if (!("speechSynthesis" in window)) {
+    voiceFailure(id);
     return;
   }
 
-  utterance = new SpeechSynthesisUtterance(
-    QUESTIONS[state.index].text
+  const voice = speechSynthesis.getVoices().find(v =>
+    /^kk(?:[-_]|$)/i.test(v.lang)
   );
-  utterance.voice = voice;
-  utterance.lang = "kk-KZ";
-  utterance.rate = .92;
 
-  utterance.onend = () => {
-    if (id === runId) beginTimer();
+  if (!voice) {
+    voiceFailure(id);
+    return;
+  }
+
+  speech = new SpeechSynthesisUtterance(QUESTIONS[state.index].text);
+  speech.voice = voice;
+  speech.lang = "kk-KZ";
+  speech.rate = .92;
+  speech.onend = () => {
+    if (id === voiceId) beginThinking();
   };
-
-  utterance.onerror = () => voiceFailure(
-    id,
-    "Дауыс ойнатылмады. Таймерді қолмен бастауға болады."
-  );
-
-  speechSynthesis.speak(utterance);
+  speech.onerror = () => voiceFailure(id);
+  speechSynthesis.speak(speech);
 }
 
-function readQuestion() {
-  if (reading || clock || paused || questionExpired) return;
+$("read").onclick = () => {
+  if (reading || clock || paused || closed() ||
+      selected !== null || state.done) return;
 
   stopVoice();
-  const id = runId;
-
+  stopMusic();
+  const id = voiceId;
   reading = true;
-  $("read").disabled = true;
+
   $("orb").classList.add("speaking");
   $("voiceStatus").textContent = "Сұрақ оқылуда…";
+  ui();
 
-  // Дауыс істемей қалса, таймер өздігінен басталмайды.
-  speechWatchdog = setTimeout(() => {
-    voiceFailure(
-      id,
-      "Аудионы тексеріңіз немесе таймерді қолмен бастаңыз."
-    );
-  }, 60000);
+  watchdog = setTimeout(() => voiceFailure(id),60000);
 
-  audio = new Audio(AUDIO_FILES[state.index]);
+  // q1.mp3 ... q9.mp3 файлдары жүктелсе, солар оқылады.
+  audio = new Audio(`q${state.index+1}.mp3`);
   audio.onended = () => {
-    if (id === runId) beginTimer();
+    if (id === voiceId) beginThinking();
   };
-  audio.onerror = () => speakWithDevice(id);
+  audio.onerror = () => deviceVoice(id);
+  audio.play().catch(() => deviceVoice(id));
+};
 
-  audio.play().catch(error => {
-    if (id !== runId) return;
-    if (error.name === "NotAllowedError") {
-      voiceFailure(
-        id,
-        "Браузер дыбысты бұғаттады. Қайта тыңдаңыз немесе таймерді қолмен бастаңыз."
+$("start").onclick = beginThinking;
+
+document.querySelectorAll(".choose").forEach(button => {
+  button.onclick = () => {
+    const team = Number(button.dataset.team);
+    if (state.done || reading || selected !== null ||
+        closed() || !record().open ||
+        record().wrong.includes(team)) return;
+
+    if (clock && timerKind === "thinking") {
+      thinkingLeft = Math.max(
+        0,(deadline-performance.now())/1000
       );
-    } else speakWithDevice(id);
-  });
-}
+    }
 
-$("read").addEventListener("click", readQuestion);
-$("manual").addEventListener("click", beginTimer);
+    stopClock();
+    stopVoice();
+    selected = team;
+    $("banner").textContent =
+      `${NAMES[team]} жауап береді! Жауапқа 5 секунд.`;
 
-$("pause").addEventListener("click", () => {
+    note([660,784,1047][team],.3,0,.04);
+    runTimer(5,"answer");
+  };
+});
+
+$("correct").onclick = () => {
+  if (selected === null || closed()) return;
+
+  const team = selected;
+  stopClock();
+  stopVoice();
+
+  record().winner = team;
+  record().revealed = true;
+  selected = null;
+  paused = false;
+
+  save();
+  $("banner").textContent =
+    `${NAMES[team]} — дұрыс жауап! +10 ұпай. Келесі сұраққа өте беріңіз.`;
+
+  [523,659,784].forEach((f,i) => note(f,.6,i*.14,.04));
+  ui();
+};
+
+$("wrong").onclick = () => {
+  if (selected === null || closed()) return;
+
+  const team = selected;
+  stopClock();
+  record().wrong.push(team);
+  selected = null;
+  paused = false;
+
+  if (record().wrong.length === 3) {
+    record().revealed = true;
+    $("banner").textContent =
+      "Үш топ та жауап берді. Дұрыс жауап ашылды.";
+    ui();
+  } else {
+    $("banner").textContent =
+      `${NAMES[team]}: жауап қабылданбады. Қалған топтарға мүмкіндік!`;
+
+    if (thinkingLeft > 0) {
+      runTimer(thinkingLeft,"thinking");
+    } else {
+      left = 0;
+      timerKind = "thinking";
+      timerPaint();
+      ui();
+    }
+  }
+  save();
+};
+
+$("pause").onclick = () => {
   if (clock) {
     tick();
-    if (questionExpired) return;
+    if (!clock) return;
 
-    clearClock();
+    stopClock();
     paused = true;
-    $("pause").textContent = "▶ Жалғастыру";
-    $("timerHint").textContent = "Таймер кідіртілді";
-  } else if (paused) {
-    beginTimer();
+    $("banner").textContent = "Таймер кідіртілді.";
+    ui();
+  } else if (paused && left > 0) {
+    runTimer(left,timerKind);
+    $("banner").textContent = selected !== null
+      ? `${NAMES[selected]} жауап береді.`
+      : "Жарыс жалғасуда. Белгі берген топты таңдаңыз.";
   }
-});
+};
 
-$("next").addEventListener("click", () => {
-  if (state.phase === "play") {
-    if (!questionExpired) return;
+$("reveal").onclick = () => {
+  if (state.done || closed()) return;
 
-    if (state.index === 8) {
-      $("next").hidden = true;
-      $("collect").hidden = false;
-      $("banner").textContent =
-        "Алдымен үш топтың парақтарын жинаңыз. Жиналғаннан кейін төмендегі батырманы басыңыз.";
-      return;
-    }
+  if (!confirm("Жауапты ашамыз ба? Бұл сұраққа бұдан кейін ұпай берілмейді.")) return;
 
-    state.index++;
-  } else if (state.phase === "review") {
-    if (!state.revealed[state.index]) {
-      $("banner").textContent =
-        "Алдымен дұрыс жауапты ашып, топтардың жауаптарын тексеріңіз.";
-      return;
-    }
+  stopClock();
+  stopVoice();
+  selected = null;
+  paused = false;
+  record().revealed = true;
+  save();
 
-    if (state.index === 8) {
-      if (!confirm("Барлық жауап тексерілді ме? Турды аяқтаймыз ба?")) return;
-      state.phase = "done";
-    } else state.index++;
-  }
+  $("banner").textContent =
+    "Дұрыс жауап ашылды. Бұл сұраққа ұпай берілмеді.";
+  ui();
+};
+
+$("next").onclick = () => {
+  if (state.done) return;
+
+  if (record().winner === null && !confirm(
+    "Бұл сұраққа ұпай берілмеді. Келесіге өтеміз бе?"
+  )) return;
+
+  stopClock();
+  stopVoice();
+
+  if (state.index === QUESTIONS.length-1) {
+    if (!confirm("Бірінші турды аяқтаймыз ба?")) return;
+    state.done = true;
+  } else state.index++;
 
   save();
-  render();
-});
+  show();
+};
 
-$("collect").addEventListener("click", () => {
-  if (!confirm("Үш топтың да жауап парақтары жиналды ма?")) return;
+$("undo").onclick = () => {
+  if (!confirm(
+    "Осы сұрақтың ұпайы мен жауап беру тарихын тазалаймыз ба?"
+  )) return;
 
-  state.phase = "review";
-  state.index = 0;
-  save();
-  render();
-});
-
-$("reveal").addEventListener("click", () => {
-  if (state.phase !== "review") return;
-
-  state.revealed[state.index] = true;
-  $("answer").hidden = false;
-  $("reveal").disabled = true;
-
-  updateScores();
-  save();
-});
-
-$("previous").addEventListener("click", () => {
-  if (state.phase !== "review" || state.index === 0) return;
-  state.index--;
-  save();
-  render();
-});
-
-document.querySelectorAll(".award").forEach(button => {
-  button.addEventListener("click", () => {
-    if (
-      state.phase !== "review" ||
-      !state.revealed[state.index]
-    ) return;
-
-    const team = Number(button.dataset.team);
-    state.awards[state.index][team] =
-      !state.awards[state.index][team];
-
-    updateScores();
-    save();
-  });
-});
-
-$("reset").addEventListener("click", () => {
-  if (!confirm("1-турдың барлық жауабы мен ұпайын тазалаймыз ба?")) return;
-
-  state = {
-    phase: "play",
-    index: 0,
-    awards: QUESTIONS.map(() => [false, false, false]),
-    revealed: QUESTIONS.map(() => false)
+  state.records[state.index] = {
+    winner:null,wrong:[],revealed:false,open:true
   };
-
   save();
-  render();
+  show();
+};
+
+$("music").onclick = () => {
+  musicEnabled = !musicEnabled;
+  $("music").textContent =
+    "♫ Әуен: "+(musicEnabled ? "қосулы" : "өшірулі");
+
+  if (!musicEnabled) stopMusic();
+  else {
+    unlock();
+    if (clock && timerKind === "thinking") startMusic();
+  }
+};
+
+$("reset").onclick = () => {
+  if (!confirm("1-турдың барлық ұпайын өшіріп, қайта бастаймыз ба?")) return;
+  state = fresh();
+  save();
+  show();
+};
+
+document.addEventListener("visibilitychange",() => {
+  if (document.hidden) {
+    // Басқа бетке ауысқанда уақыт пен дыбысты кідірту.
+    if (clock) {
+      tick();
+      if (clock) {
+        stopClock();
+        paused = true;
+        ui();
+      }
+    } else stopMusic();
+
+    if (reading) {
+      stopVoice();
+      $("voiceStatus").textContent =
+        "Оқу тоқтатылды. Қайта тыңдаңыз немесе таймерді бастаңыз.";
+      ui();
+    }
+  }
 });
 
-window.addEventListener("pagehide", () => {
-  clearClock();
+window.addEventListener("pagehide",() => {
+  stopClock();
   stopVoice();
 });
 
-render();
-</script>
-  <script>
-(() => {
-  let musicContext;
-  let musicEnabled = true;
-  let activeSounds = [];
-  let wasRunning = false;
-  let lastSecond = -1;
-  let nextBeat = 0;
-  let melodyStep = 0;
-
-  // Музыканы қосу және өшіру батырмасы.
-  const musicButton = document.createElement("button");
-  musicButton.className = "ghost";
-  musicButton.textContent = "♫ Әуен: қосулы";
-  musicButton.setAttribute("aria-pressed", "true");
-  document.querySelector("footer").appendChild(musicButton);
-
-  function unlockAudio() {
-    if (!musicEnabled) return;
-
-    try {
-      const Audio = window.AudioContext ||
-        window.webkitAudioContext;
-
-      if (!Audio) return;
-      if (!musicContext) musicContext = new Audio();
-
-      musicContext.resume().catch(() => {});
-    } catch (error) {}
-  }
-
-  // Браузер дыбысқа батырма басылғаннан кейін рұқсат береді.
-  document.addEventListener("click", event => {
-    if (event.target.closest("button")) unlockAudio();
-  }, true);
-
-  function stopSounds() {
-    activeSounds.forEach(node => {
-      try { node.stop(); } catch (error) {}
-    });
-    activeSounds = [];
-  }
-
-  function playNote(
-    frequency,
-    duration = .7,
-    delay = 0,
-    volume = .025,
-    type = "sine"
-  ) {
-    if (
-      !musicEnabled ||
-      !musicContext ||
-      musicContext.state !== "running" ||
-      document.hidden
-    ) return;
-
-    const start = musicContext.currentTime + delay;
-    const oscillator = musicContext.createOscillator();
-    const envelope = musicContext.createGain();
-
-    oscillator.type = type;
-    oscillator.frequency.value = frequency;
-
-    envelope.gain.setValueAtTime(0, start);
-    envelope.gain.linearRampToValueAtTime(
-      volume, start + .025
-    );
-    envelope.gain.exponentialRampToValueAtTime(
-      .0001, start + duration
-    );
-
-    oscillator.connect(envelope);
-    envelope.connect(musicContext.destination);
-
-    oscillator.start(start);
-    oscillator.stop(start + duration + .04);
-    activeSounds.push(oscillator);
-
-    oscillator.onended = () => {
-      oscillator.disconnect();
-      envelope.disconnect();
-      activeSounds = activeSounds.filter(
-        sound => sound !== oscillator
-      );
-    };
-  }
-
-  // Жұмсақ электронды фон.
-  const melody = [
-    440, 523.25, 659.25, 587.33,
-    440, 392, 523.25, 659.25
-  ];
-
-  function thinkingMusic() {
-    const frequency = melody[melodyStep % melody.length];
-
-    playNote(frequency, 1.1, 0, .018);
-    playNote(frequency / 2, 1.3, 0, .018);
-    playNote(frequency * 2, .55, .22, .006);
-
-    melodyStep++;
-  }
-
-  // Командалардың жеңіс әуендері.
-  function teamVictory(team) {
-    stopSounds();
-
-    const tunes = [
-      [440, 660, 880],
-      [392, 587.33, 783.99],
-      [523.25, 659.25, 1046.5]
-    ];
-
-    tunes[team].forEach((frequency, index) => {
-      playNote(
-        frequency,
-        .5,
-        index * .14,
-        .045,
-        team === 0 ? "triangle" : "sine"
-      );
-    });
-  }
-
-  document.querySelectorAll(".award").forEach(button => {
-    button.addEventListener("click", () => {
-      const team = Number(button.dataset.team);
-
-      // Ұпай қосылғанда ғана ойнайды, қайтарғанда ойнамайды.
-      if (
-        state.phase === "review" &&
-        state.revealed[state.index] &&
-        state.awards[state.index][team]
-      ) {
-        teamVictory(team);
-      }
-    });
-  });
-
-  musicButton.addEventListener("click", () => {
-    musicEnabled = !musicEnabled;
-
-    musicButton.textContent =
-      "♫ Әуен: " + (musicEnabled ? "қосулы" : "өшірулі");
-
-    musicButton.setAttribute(
-      "aria-pressed", String(musicEnabled)
-    );
-
-    if (!musicEnabled) {
-      stopSounds();
-    } else {
-      unlockAudio();
-      nextBeat = 0;
-    }
-  });
-
-  // Сұрақ оқылғанда, таймер кідіргенде және бет жасырылғанда
-  // әуен тоқтайды.
-  const musicClock = setInterval(() => {
-    const running =
-      state.phase === "play" &&
-      Boolean(clock) &&
-      !reading &&
-      !paused &&
-      !document.hidden;
-
-    if (!running) {
-      if (wasRunning) {
-        stopSounds();
-
-        // Уақыт біткендегі қысқа белгі.
-        if (
-          questionExpired &&
-          state.phase === "play" &&
-          !document.hidden
-        ) {
-          playNote(523.25, .25, 0, .04);
-          playNote(392, .5, .22, .035);
-        }
-      }
-
-      wasRunning = false;
-      lastSecond = -1;
-      nextBeat = 0;
-      return;
-    }
-
-    if (!wasRunning) {
-      stopSounds();
-      melodyStep = 0;
-      nextBeat = 0;
-      lastSecond = -1;
-    }
-
-    wasRunning = true;
-    const second = Math.ceil(left);
-
-    // Соңғы 5 секундта фон тоқтап, анық белгі естіледі.
-    if (second <= 5 && second > 0) {
-      if (lastSecond !== second) {
-        stopSounds();
-        playNote(700 + (5 - second) * 65, .13, 0, .035);
-      }
-    } else if (performance.now() >= nextBeat) {
-      thinkingMusic();
-      nextBeat = performance.now() + 1500;
-    }
-
-    lastSecond = second;
-  }, 100);
-
-  // Оқу басталғанда жеңіс әуені де дереу тоқтайды.
-  $("read").addEventListener("click", stopSounds, true);
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stopSounds();
-  });
-
-  window.addEventListener("pagehide", () => {
-    clearInterval(musicClock);
-    stopSounds();
-    if (musicContext) musicContext.close().catch(() => {});
-  });
-})();
+show();
 </script>
 </body>
 </html>
