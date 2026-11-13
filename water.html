@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Су молекуласы — 3D зертхана</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;background:#140e10;color:#fff0d8;
+  font-family:"Segoe UI",Arial,sans-serif
+}
+.lab{
+  position:relative;height:660px;overflow:hidden;
+  background:radial-gradient(ellipse at center,#303a45,#140e10 75%)
+}
+#scene{position:absolute;inset:0}
+canvas{display:block;touch-action:none}
+.top{
+  position:absolute;top:20px;left:20px;right:20px;
+  pointer-events:none
+}
+h1{font-size:22px;margin:0 0 8px;color:#ffdc98}
+.subtitle{font-size:13px;line-height:1.7;color:#cbbca7}
+.formula{
+  display:inline-block;margin-top:12px;
+  padding:8px 16px;border-radius:30px;
+  border:1px solid #d6b77a;background:#211719bb;
+  color:#ffe0a2;font-size:23px;font-weight:800
+}
+.legend{
+  position:absolute;left:20px;top:150px;
+  font-size:12px;display:grid;gap:10px;pointer-events:none
+}
+.legend span{
+  padding:8px 11px;border:1px solid #ffffff22;
+  background:#16141cbb;border-radius:8px
+}
+.bottom{
+  position:absolute;left:15px;right:15px;bottom:18px;
+  text-align:center
+}
+.controls{
+  display:flex;justify-content:center;
+  flex-wrap:wrap;gap:8px;margin-top:10px
+}
+button{
+  font:inherit;font-size:12px;font-weight:700;
+  padding:11px 14px;border-radius:10px;
+  color:#ffe1a7;background:#322017;
+  border:1px solid #d3aa67;cursor:pointer
+}
+button.primary{
+  color:#341b0a;
+  background:linear-gradient(135deg,#ffe3a0,#d99a38)
+}
+button:disabled{opacity:.4;cursor:default}
+button:focus-visible{outline:3px solid white;outline-offset:3px}
+#status{
+  min-height:45px;font-size:14px;line-height:1.7;
+  text-shadow:0 2px 8px #000
+}
+#conclusion{
+  max-width:620px;margin:10px auto;padding:12px;
+  border:1px solid #9aca9b;border-radius:12px;
+  background:#183128dd;color:#e0ffda;
+  font-size:14px;line-height:1.7
+}
+.hint{
+  margin-top:10px;font-size:11px;
+  line-height:1.7;color:#b6a58e
+}
+#error{
+  position:absolute;inset:0;display:grid;
+  place-items:center;text-align:center;
+  background:#211516;padding:30px;z-index:5;line-height:1.8
+}
+[hidden]{display:none!important}
+@media(max-width:500px){
+  .lab{height:700px}
+  h1{font-size:18px}
+  .legend{top:145px}
+  button{font-size:11px;padding:10px}
+}
+</style>
+</head>
+
+<body>
+<div class="lab">
+  <div id="scene"
+       aria-label="Бұрыштық пішінді су молекуласының айналмалы 3D моделі">
+  </div>
+
+  <div class="top">
+    <h1>СУ МОЛЕКУЛАСЫ · 3D</h1>
+    <div class="subtitle">
+      Қоспа ма, әлде химиялық қосылыс па?
+    </div>
+    <div class="formula">H₂O</div>
+  </div>
+
+  <div class="legend">
+    <span>🔴 Оттек — O</span>
+    <span>⚪ Сутек — H</span>
+  </div>
+
+  <div class="bottom">
+    <div id="status" role="status" aria-live="polite">
+      Молекула жүктелуде…
+    </div>
+
+    <div id="conclusion" hidden>
+      <strong>Су — химиялық қосылыс.</strong><br>
+      Екі сутек атомы мен бір оттек атомы химиялық байланысқан.
+      Оларды жай сүзу арқылы бөлуге болмайды.
+    </div>
+
+    <div class="controls">
+      <button class="primary" id="composition" disabled>
+        Құрамын көрсет
+      </button>
+      <button id="rotation" disabled>Ⅱ Айналуды тоқтату</button>
+      <button id="reset" disabled>↶ Бастапқы көрініс</button>
+    </div>
+
+    <div class="controls">
+      <button id="left" disabled>↶ Солға</button>
+      <button id="right" disabled>Оңға ↷</button>
+      <button id="zoomIn" disabled>＋ Жақындату</button>
+      <button id="zoomOut" disabled>− Алыстату</button>
+    </div>
+
+    <div class="hint">
+      Тінтуірмен сүйреп айналдырыңыз.<br>
+      Шарлар мен таяқшалар — атомдар мен байланыстардың
+      шартты бейнесі. Түстері мен өлшемдері шартты.
+    </div>
+  </div>
+
+  <div id="error" hidden></div>
+</div>
+
+<script type="module">
+const $ = id => document.getElementById(id);
+
+try {
+  const THREE = await import(
+    "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+  );
+
+  const host = $("scene");
+  const scene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(42,1,.1,100);
+
+  const renderer = new THREE.WebGLRenderer({
+    antialias:true,
+    alpha:true
+  });
+
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+
+  host.appendChild(renderer.domElement);
+
+  scene.add(new THREE.HemisphereLight(0xfff3dc,0x182334,2));
+
+  const key = new THREE.DirectionalLight(0xffe0bd,4);
+  key.position.set(4,6,7);
+  scene.add(key);
+
+  const blue = new THREE.PointLight(0x76cfff,30,20);
+  blue.position.set(-4,2,-3);
+  scene.add(blue);
+
+  const warm = new THREE.PointLight(0xff9c6d,20,15);
+  warm.position.set(4,-2,2);
+  scene.add(warm);
+
+  const molecule = new THREE.Group();
+  scene.add(molecule);
+
+  const oxygenMaterial = new THREE.MeshPhysicalMaterial({
+    color:0xe34232,
+    metalness:.2,
+    roughness:.2,
+    clearcoat:1,
+    clearcoatRoughness:.15
+  });
+
+  const hydrogenMaterial = new THREE.MeshPhysicalMaterial({
+    color:0xf5f8ff,
+    metalness:.12,
+    roughness:.18,
+    clearcoat:1
+  });
+
+  const bondMaterial = new THREE.MeshStandardMaterial({
+    color:0xb5c2d1,
+    metalness:.6,
+    roughness:.25,
+    emissive:0x152432,
+    emissiveIntensity:.3
+  });
+
+  const oxygenPosition = new THREE.Vector3(0,-.25,0);
+
+  // Бұрыштық молекула: H–O–H бұрышы шамамен 104,5°.
+  const halfAngle = 52.25*Math.PI/180;
+  const bondLength = 1.85;
+
+  const hydrogenPositions = [-1,1].map(sign =>
+    new THREE.Vector3(
+      sign*Math.sin(halfAngle)*bondLength,
+      oxygenPosition.y+Math.cos(halfAngle)*bondLength,
+      0
+    )
+  );
+
+  function atom(radius,material,position) {
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(radius,48,32),
+      material
+    );
+    mesh.position.copy(position);
+    molecule.add(mesh);
+    return mesh;
+  }
+
+  atom(.72,oxygenMaterial,oxygenPosition);
+
+  hydrogenPositions.forEach(position => {
+    atom(.43,hydrogenMaterial,position);
+  });
+
+  function bond(start,end) {
+    const direction = new THREE.Vector3().subVectors(end,start);
+
+    const mesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(
+        .115,.115,direction.length(),24
+      ),
+      bondMaterial
+    );
+
+    mesh.position.copy(start).add(end).multiplyScalar(.5);
+    mesh.quaternion.setFromUnitVectors(
+      new THREE.Vector3(0,1,0),
+      direction.clone().normalize()
+    );
+
+    molecule.add(mesh);
+  }
+
+  hydrogenPositions.forEach(position => {
+    bond(oxygenPosition,position);
+  });
+
+  // Атом атаулары модельмен бірге қозғалады.
+  const labels = [];
+
+  function makeLabel(text,position,color) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 128;
+
+    const context = canvas.getContext("2d");
+    context.font = "bold 76px Arial";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.lineWidth = 8;
+    context.strokeStyle = "#17212c";
+    context.strokeText(text,128,64);
+    context.fillStyle = color;
+    context.fillText(text,128,64);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+
+    const sprite = new THREE.Sprite(
+      new THREE.SpriteMaterial({
+        map:texture,
+        transparent:true,
+        depthTest:false
+      })
+    );
+
+    sprite.position.copy(position);
+    sprite.scale.set(.9,.45,1);
+    sprite.visible = false;
+    molecule.add(sprite);
+    labels.push(sprite);
+  }
+
+  makeLabel(
+    "O",
+    oxygenPosition.clone().add(new THREE.Vector3(0,-1.02,0)),
+    "#ffb3a0"
+  );
+
+  hydrogenPositions.forEach(position => {
+    makeLabel(
+      "H",
+      position.clone().add(new THREE.Vector3(0,.72,0)),
+      "#ffffff"
+    );
+  });
+
+  // Декоративна платформаның жарық сақинасы.
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(2.7,.018,12,120),
+    new THREE.MeshStandardMaterial({
+      color:0xd1aa67,
+      emissive:0xc59042,
+      emissiveIntensity:1.5
+    })
+  );
+  ring.rotation.x = Math.PI/2;
+  ring.position.y = -1.9;
+  scene.add(ring);
+
+  let azimuth = .1;
+  let elevation = .16;
+  let distance = 10;
+  const target = new THREE.Vector3(0,0,0);
+
+  function placeCamera() {
+    camera.position.set(
+      Math.sin(azimuth)*Math.cos(elevation)*distance,
+      Math.sin(elevation)*distance,
+      Math.cos(azimuth)*Math.cos(elevation)*distance
+    );
+    camera.lookAt(target);
+  }
+
+  const reducedMotion = matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  let autoRotate = !reducedMotion;
+
+  function rotationText() {
+    $("rotation").textContent = autoRotate
+      ? "Ⅱ Айналуды тоқтату"
+      : "▶ Айналдыру";
+  }
+
+  let dragging = false;
+  let pointerId = null;
+  let previousX = 0;
+  let previousY = 0;
+
+  renderer.domElement.addEventListener("pointerdown",e => {
+    if (dragging) return;
+
+    dragging = true;
+    pointerId = e.pointerId;
+    previousX = e.clientX;
+    previousY = e.clientY;
+    autoRotate = false;
+    rotationText();
+
+    renderer.domElement.setPointerCapture(e.pointerId);
+  });
+
+  renderer.domElement.addEventListener("pointermove",e => {
+    if (!dragging || e.pointerId !== pointerId) return;
+
+    azimuth -= (e.clientX-previousX)*.008;
+    elevation += (e.clientY-previousY)*.006;
+    elevation = Math.max(-.7,Math.min(.7,elevation));
+
+    previousX = e.clientX;
+    previousY = e.clientY;
+    placeCamera();
+  });
+
+  function release() {
+    dragging = false;
+    pointerId = null;
+  }
+
+  renderer.domElement.addEventListener("pointerup",release);
+  renderer.domElement.addEventListener("pointercancel",release);
+  renderer.domElement.addEventListener("lostpointercapture",release);
+
+  renderer.domElement.addEventListener("wheel",e => {
+    e.preventDefault();
+    distance = Math.max(7.5,Math.min(16,distance+e.deltaY*.01));
+    placeCamera();
+  },{passive:false});
+
+  $("composition").onclick = () => {
+    labels.forEach(label => label.visible = true);
+    bondMaterial.emissive.setHex(0x6e4718);
+    bondMaterial.emissiveIntensity = 1;
+
+    $("status").textContent =
+      "Құрамы: 2 сутек атомы + 1 оттек атомы. Формуласы — H₂O.";
+    $("conclusion").hidden = false;
+    $("composition").disabled = true;
+  };
+
+  $("rotation").onclick = () => {
+    autoRotate = !autoRotate;
+    rotationText();
+  };
+
+  $("reset").onclick = () => {
+    azimuth = .1;
+    elevation = .16;
+    distance = 10;
+    molecule.rotation.set(0,0,0);
+
+    autoRotate = !reducedMotion;
+    labels.forEach(label => label.visible = false);
+    bondMaterial.emissive.setHex(0x152432);
+    bondMaterial.emissiveIntensity = .3;
+
+    $("conclusion").hidden = true;
+    $("composition").disabled = false;
+    $("status").textContent =
+      "Модельді айналдырып қараңыз. Құрамын ашып, ЖИ тұжырымын тексеріңіз.";
+
+    placeCamera();
+    rotationText();
+  };
+
+  $("left").onclick = () => {
+    autoRotate = false;
+    azimuth -= .3;
+    placeCamera();
+    rotationText();
+  };
+
+  $("right").onclick = () => {
+    autoRotate = false;
+    azimuth += .3;
+    placeCamera();
+    rotationText();
+  };
+
+  $("zoomIn").onclick = () => {
+    distance = Math.max(7.5,distance-1);
+    placeCamera();
+  };
+
+  $("zoomOut").onclick = () => {
+    distance = Math.min(16,distance+1);
+    placeCamera();
+  };
+
+  function resize() {
+    const width = host.clientWidth;
+    const height = host.clientHeight;
+
+    renderer.setSize(width,height);
+    camera.aspect = width/height;
+    camera.updateProjectionMatrix();
+  }
+
+  new ResizeObserver(resize).observe(host);
+
+  renderer.domElement.addEventListener("webglcontextlost",e => {
+    e.preventDefault();
+    $("error").hidden = false;
+    $("error").textContent =
+      "3D көрініс тоқтады. Бетті жаңартыңыз.";
+  });
+
+  let previousTime = performance.now();
+
+  function frame(now) {
+    const delta = Math.min((now-previousTime)/1000,.05);
+    previousTime = now;
+
+    if (autoRotate && !document.hidden) {
+      azimuth += delta*.2;
+      placeCamera();
+    }
+
+    renderer.render(scene,camera);
+    requestAnimationFrame(frame);
+  }
+
+  [
+    "composition","rotation","reset",
+    "left","right","zoomIn","zoomOut"
+  ].forEach(id => $(id).disabled = false);
+
+  $("status").textContent =
+    "Модельді айналдырып қараңыз. Құрамын ашып, ЖИ тұжырымын тексеріңіз.";
+
+  resize();
+  placeCamera();
+  rotationText();
+  requestAnimationFrame(frame);
+
+} catch(error) {
+  $("error").hidden = false;
+  $("error").textContent =
+    "3D модель жүктелмеді. Интернетті тексеріп, бетті жаңартыңыз. Браузер WebGL технологиясын қолдауы қажет.";
+}
+</script>
+</body>
+</html>
