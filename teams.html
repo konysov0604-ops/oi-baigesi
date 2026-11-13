@@ -429,8 +429,15 @@ h1 {
       <div class="breakdown" id="details2"></div>
     </article>
   </section>
+   <div class="finished" id="finished">
+  <p>Қатысып отырған оқушылардың бәрі топқа бөлінді ме?</p>
 
- <div class="finished" id="finished" hidden>
+  <a href="round1.html" class="primary"
+     style="display:inline-block;text-decoration:none;"
+     onclick="return confirm('Топқа бөлуді аяқтап, бірінші турға өтеміз бе?');">
+    Топқа бөлуді аяқтау →
+  </a>
+</div>
   <p>Командалар дайын! Бәйгеге қош келдіңіздер! 🏆</p>
 
   <a href="round1.html" class="primary"
@@ -551,7 +558,7 @@ function render() {
   $("scanButton").disabled = busy || remaining(grade) === 0;
   $("undoButton").disabled = busy || history.length === 0;
   $("resetButton").disabled = busy || history.length === 0;
-  $("finished").hidden = history.length !== 23;
+  $("finished").hidden = false;
 
   if (!busy) {
     $("scanButton").textContent = history.length === 23
