@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ніл аңғары — 3D</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;background:#20120d;color:#fff1d5;
+  font-family:"Segoe UI",Arial,sans-serif
+}
+.lab{
+  position:relative;height:740px;overflow:hidden;
+  background:linear-gradient(#40312b,#20120d)
+}
+#scene{position:absolute;inset:0;z-index:0}
+canvas{display:block;touch-action:none}
+.top{
+  position:absolute;z-index:1;left:20px;right:20px;top:20px;
+  pointer-events:none
+}
+h1{font-size:22px;color:#ffdc98;margin:0 0 9px}
+.subtitle{color:#deccb0;font-size:13px;line-height:1.7}
+.badge{
+  display:inline-block;padding:8px 14px;margin-top:12px;
+  background:#28190fd9;border:1px solid #d5b577;
+  border-radius:25px;color:#ffe0a2;font-size:12px
+}
+.bottom{
+  position:absolute;z-index:1;
+  left:15px;right:15px;bottom:18px;text-align:center
+}
+#status{
+  max-width:660px;margin:auto;padding:12px 16px;
+  background:#20160de8;border:1px solid #b98b5066;
+  border-radius:12px;font-size:14px;line-height:1.7
+}
+.controls{
+  display:flex;justify-content:center;flex-wrap:wrap;
+  gap:8px;margin-top:11px
+}
+button{
+  padding:11px 14px;border:1px solid #d3aa67;
+  border-radius:10px;color:#ffe1a7;background:#322017;
+  font:inherit;font-size:12px;font-weight:700;cursor:pointer
+}
+.primary{
+  background:linear-gradient(135deg,#ffe3a0,#d99a38);
+  color:#341b0a
+}
+button:disabled{opacity:.4;cursor:default}
+button:focus-visible{outline:3px solid white;outline-offset:3px}
+.hint{font-size:11px;color:#c7b496;line-height:1.7;margin-top:12px}
+#error{
+  position:absolute;z-index:5;inset:0;display:grid;
+  place-items:center;background:#211516;
+  padding:30px;text-align:center;line-height:1.8
+}
+[hidden]{display:none!important}
+@media(max-width:500px){
+  .lab{height:790px}
+  h1{font-size:19px}
+  button{padding:10px;font-size:11px}
+}
+</style>
+</head>
+<body>
+<div class="lab">
+  <div id="scene" aria-label="Ніл өзені, егін алқаптары, қайық пен қоныстардың айналмалы 3D моделі"></div>
+
+  <div class="top">
+    <h1>НІЛ АҢҒАРЫ · 3D</h1>
+    <div class="subtitle">Өзен өркениеттің дамуына қалай ықпал етті?</div>
+    <div class="badge" id="stage">Зерттеу басталмады</div>
+  </div>
+
+  <div class="bottom">
+    <div id="status" role="status" aria-live="polite">
+      3D көрініс жүктелуде…
+    </div>
+    <div class="controls">
+      <button class="primary" id="discover" disabled>
+        ① Егіншілікті зерттеу
+      </button>
+      <button id="reset" disabled>↶ Қайта зерттеу</button>
+    </div>
+    <div class="controls">
+      <button id="left" disabled>↶ Солға</button>
+      <button id="right" disabled>Оңға ↷</button>
+      <button id="zoomIn" disabled>＋ Жақындату</button>
+      <button id="zoomOut" disabled>− Алыстату</button>
+    </div>
+    <div class="hint">
+      Тінтуірмен сүйреп айналдырыңыз.<br>
+      Тарихи ортаның шартты оқу моделі.
+      Географиялық масштаб пен ғимараттар дәл көшірілмеген.
+    </div>
+  </div>
+
+  <div id="error" hidden></div>
+</div>
+
+<script type="module">
+const $ = id => document.getElementById(id);
+
+try {
+  const THREE = await import(
+    "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+  );
+
+  const host = $("scene");
+  const scene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(43,1,.1,100);
+  const renderer = new THREE.WebGLRenderer({
+    antialias:true,alpha:true
+  });
+
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+  host.appendChild(renderer.domElement);
+
+  scene.add(new THREE.HemisphereLight(0xffeed2,0x625039,2.3));
+
+  const sun = new THREE.DirectionalLight(0xffd89e,3);
+  sun.position.set(-6,12,7);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(1024,1024);
+  sun.shadow.camera.left = -10;
+  sun.shadow.camera.right = 10;
+  sun.shadow.camera.top = 10;
+  sun.shadow.camera.bottom = -10;
+  sun.shadow.normalBias = .035;
+  scene.add(sun);
+
+  function material(color,roughness=.85) {
+    return new THREE.MeshStandardMaterial({color,roughness});
+  }
+
+  const sand = material(0xc69d63);
+  const soil = material(0x70562e);
+  const green = material(0x729347);
+  const wheat = material(0xb8b85a);
+  const wall = material(0xd6b57f);
+  const roof = material(0xa78353);
+  const wood = material(0x66442b);
+
+  function box(w,h,d,mat,x,y,z,parent=scene) {
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(w,h,d),mat
+    );
+    mesh.position.set(x,y,z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    parent.add(mesh);
+    return mesh;
+  }
+
+  // Платформа.
+  box(12,.55,9,material(0x61452c),0,-.35,0);
+  box(12,.12,9,sand,0,-.015,0);
+
+  // Өзен сол және оң жағалауды бөліп өтеді.
+  const waterMaterial = new THREE.MeshPhysicalMaterial({
+    color:0x378eae,
+    metalness:.22,
+    roughness:.26,
+    clearcoat:.8
+  });
+
+  box(2.1,.08,8.85,waterMaterial,0,.08,0);
+
+  const riverDetails = new THREE.Group();
+  scene.add(riverDetails);
+
+  for (let i=0;i<22;i++) {
+    const line = box(
+      .035,.012,.24,material(0x99cbd0),
+      -.82+(i%4)*.52,.13,-4+(i*.37)%8,
+      riverDetails
+    );
+    line.userData.initialZ = line.position.z;
+  }
+
+  // Жасыл жағалау.
+  box(.45,.04,8.8,green,-1.28,.09,0);
+  box(.45,.04,8.8,green,1.28,.09,0);
+
+  // Алқаптар.
+  const fields = new THREE.Group();
+  scene.add(fields);
+
+  const cropMaterials = [];
+
+  [
+    [-3.2,-2.6],[-3.2,-.3],[-3.2,2.0],
+    [3.2,-2.7]
+  ].forEach(([x,z]) => {
+    box(2.5,.08,1.7,soil,x,.09,z,fields);
+
+    const cropMaterial = wheat.clone();
+    cropMaterials.push(cropMaterial);
+
+    for (let row=0;row<5;row++) {
+      box(
+        2.23,.08,.16,cropMaterial,
+        x,.17,z-.62+row*.31,fields
+      );
+    }
+  });
+
+  // Суару арналары: зерттеу кезінде көрінеді.
+  const canals = new THREE.Group();
+  canals.visible = false;
+  scene.add(canals);
+
+  [-2.6,-.3,2.0].forEach(z => {
+    box(2.8,.035,.12,waterMaterial,-2.55,.205,z,canals);
+  });
+  box(2.8,.035,.12,waterMaterial,2.55,.205,-2.7,canals);
+
+  // Қоныс.
+  const settlement = new THREE.Group();
+  const houseMaterials = [];
+  scene.add(settlement);
+
+  [
+    [2.6,.3],[4.1,.5],[2.5,2.1],[4.15,2.4]
+  ].forEach(([x,z],index) => {
+    const height = .7+(index%2)*.25;
+    const mat = wall.clone();
+    houseMaterials.push(mat);
+
+    box(1.05,height,1,mat,x,.15+height/2,z,settlement);
+    box(1.15,.13,1.1,roof,x,.15+height+.065,z,settlement);
+
+    // Есік.
+    box(
+      .23,.42,.025,wood,
+      x,.36,z+.514,settlement
+    );
+  });
+
+  // Пальмалар.
+  function palm(x,z) {
+    const trunk = new THREE.Mesh(
+      new THREE.CylinderGeometry(.055,.09,1.2,10),
+      wood
+    );
+    trunk.position.set(x,.7,z);
+    scene.add(trunk);
+
+    for (let i=0;i<6;i++) {
+      const leaf = new THREE.Mesh(
+        new THREE.SphereGeometry(1,12,8),
+        green
+      );
+      leaf.scale.set(.11,.035,.55);
+      leaf.rotation.y = i*Math.PI/3;
+      leaf.position.set(
+        x+Math.sin(i*Math.PI/3)*.28,
+        1.3,
+        z+Math.cos(i*Math.PI/3)*.28
+      );
+      scene.add(leaf);
+    }
+  }
+
+  [[-1.8,-3.5],[1.8,3.6],[4.9,-3.7]].forEach(
+    ([x,z]) => palm(x,z)
+  );
+
+  // Қайық.
+  const boat = new THREE.Group();
+  boat.position.set(0,.18,-3.2);
+  scene.add(boat);
+
+  const hull = new THREE.Mesh(
+    new THREE.SphereGeometry(1,24,16),
+    wood
+  );
+  hull.scale.set(.35,.16,.78);
+  boat.add(hull);
+
+  const mast = new THREE.Mesh(
+    new THREE.CylinderGeometry(.018,.018,1.35,8),
+    wood
+  );
+  mast.position.y = .7;
+  boat.add(mast);
+
+  const sail = new THREE.Mesh(
+    new THREE.PlaneGeometry(.78,.9),
+    new THREE.MeshStandardMaterial({
+      color:0xffefcf,
+      side:THREE.DoubleSide,
+      roughness:1
+    })
+  );
+  sail.position.set(.05,.85,0);
+  sail.rotation.y = .3;
+  boat.add(sail);
+
+  // Қонысты ерекшелеу сақинасы.
+  const settlementRing = new THREE.Mesh(
+    new THREE.TorusGeometry(1.95,.035,10,80),
+    new THREE.MeshStandardMaterial({
+      color:0xffd373,
+      emissive:0xb57b22,
+      emissiveIntensity:1.2
+    })
+  );
+
+  settlementRing.rotation.x = Math.PI/2;
+  settlementRing.position.set(3.35,.2,1.45);
+  settlementRing.visible = false;
+  scene.add(settlementRing);
+
+  let step = 0;
+  let boatMoving = false;
+  let elapsed = 0;
+
+  const messages = [
+    "Ніл аңғарын айналдырып қараңыз. Өзеннің маңызын зерттеуді бастаңыз.",
+    "① Егіншілік: Ніл суы алқаптарды суаруға көмектесті. Өзен аңғары егіншілік үшін маңызды болды.",
+    "② Қатынас: өзен жолымен адамдар мен тауарлар тасымалданды. Қайықтың қозғалысын бақылаңыз.",
+    "③ Қоныстар: су мен егіншілікке қолайлы жерлердің маңында елді мекендер дамыды.",
+    "Қорытынды: Ніл су, азық өндіру және қатынас арқылы Ежелгі Мысыр өркениетінің дамуына ықпал етті."
+  ];
+
+  const buttonTexts = [
+    "① Егіншілікті зерттеу",
+    "② Өзен қатынасын зерттеу",
+    "③ Қоныстарды зерттеу",
+    "✓ Қорытындыны ашу",
+    "Зерттеу аяқталды"
+  ];
+
+  function updateText() {
+    $("status").textContent = messages[step];
+    $("discover").textContent = buttonTexts[step];
+    $("discover").disabled = step === 4;
+
+    $("stage").textContent = step === 0
+      ? "Зерттеуге дайын"
+      : step === 4 ? "ЖИ ТҰЖЫРЫМЫ ДҰРЫС"
+      : `Зерттеу ${step} / 3`;
+  }
+
+  $("discover").onclick = () => {
+    if (step >= 4) return;
+    step++;
+
+    if (step >= 1) {
+      canals.visible = true;
+      cropMaterials.forEach(mat => {
+        mat.color.setHex(0x91b64f);
+      });
+    }
+
+    if (step >= 2) boatMoving = true;
+
+    if (step >= 3) {
+      settlementRing.visible = true;
+      houseMaterials.forEach(mat => {
+        mat.emissive.setHex(0x634114);
+        mat.emissiveIntensity = .45;
+      });
+    }
+
+    updateText();
+  };
+
+  // Камера.
+  let azimuth = .48;
+  let elevation = .72;
+  let distance = 19;
+  const target = new THREE.Vector3(0,0,0);
+
+  function placeCamera() {
+    camera.position.set(
+      Math.sin(azimuth)*Math.cos(elevation)*distance,
+      Math.sin(elevation)*distance,
+      Math.cos(azimuth)*Math.cos(elevation)*distance
+    );
+    camera.lookAt(target);
+  }
+
+  let dragging = false;
+  let pointerId = null;
+  let previousX = 0;
+  let previousY = 0;
+
+  renderer.domElement.addEventListener("pointerdown",e => {
+    if (dragging) return;
+    dragging = true;
+    pointerId = e.pointerId;
+    previousX = e.clientX;
+    previousY = e.clientY;
+    renderer.domElement.setPointerCapture(e.pointerId);
+  });
+
+  renderer.domElement.addEventListener("pointermove",e => {
+    if (!dragging || pointerId !== e.pointerId) return;
+
+    azimuth -= (e.clientX-previousX)*.007;
+    elevation += (e.clientY-previousY)*.005;
+    elevation = Math.max(.25,Math.min(1.3,elevation));
+
+    previousX = e.clientX;
+    previousY = e.clientY;
+    placeCamera();
+  });
+
+  function release() {
+    dragging = false;
+    pointerId = null;
+  }
+
+  renderer.domElement.addEventListener("pointerup",release);
+  renderer.domElement.addEventListener("pointercancel",release);
+  renderer.domElement.addEventListener("lostpointercapture",release);
+
+  renderer.domElement.addEventListener("wheel",e => {
+    e.preventDefault();
+    distance = Math.max(12,Math.min(28,distance+e.deltaY*.015));
+    placeCamera();
+  },{passive:false});
+
+  $("left").onclick = () => {
+    azimuth -= .25;
+    placeCamera();
+  };
+  $("right").onclick = () => {
+    azimuth += .25;
+    placeCamera();
+  };
+  $("zoomIn").onclick = () => {
+    distance = Math.max(12,distance-1.5);
+    placeCamera();
+  };
+  $("zoomOut").onclick = () => {
+    distance = Math.min(28,distance+1.5);
+    placeCamera();
+  };
+
+  $("reset").onclick = () => {
+    step = 0;
+    boatMoving = false;
+    boat.position.z = -3.2;
+    boat.rotation.y = 0;
+    canals.visible = false;
+    settlementRing.visible = false;
+
+    cropMaterials.forEach(mat => {
+      mat.color.setHex(0xb8b85a);
+    });
+
+    houseMaterials.forEach(mat => {
+      mat.emissive.setHex(0x000000);
+    });
+
+    azimuth = .48;
+    elevation = .72;
+    distance = 19;
+
+    placeCamera();
+    updateText();
+  };
+
+  function resize() {
+    const width = host.clientWidth;
+    const height = host.clientHeight;
+    renderer.setSize(width,height);
+    camera.aspect = width/height;
+    camera.updateProjectionMatrix();
+  }
+
+  new ResizeObserver(resize).observe(host);
+
+  renderer.domElement.addEventListener("webglcontextlost",e => {
+    e.preventDefault();
+    $("error").hidden = false;
+    $("error").textContent =
+      "3D көрініс тоқтады. Бетті жаңартыңыз.";
+  });
+
+  let previousTime = performance.now();
+
+  function frame(now) {
+    const delta = Math.min((now-previousTime)/1000,.05);
+    previousTime = now;
+
+    if (!document.hidden) {
+      elapsed += delta;
+
+      riverDetails.children.forEach(line => {
+        line.position.z =
+          ((line.userData.initialZ+4+elapsed*.25)%8)-4;
+      });
+
+      if (boatMoving) {
+        const oldZ = boat.position.z;
+        boat.position.z = Math.sin(elapsed*.3)*3.1;
+        boat.rotation.y = boat.position.z >= oldZ ? 0 : Math.PI;
+        boat.position.y = .18+Math.sin(elapsed*2)*.015;
+      }
+    }
+
+    renderer.render(scene,camera);
+    requestAnimationFrame(frame);
+  }
+
+  [
+    "discover","reset","left","right","zoomIn","zoomOut"
+  ].forEach(id => $(id).disabled = false);
+
+  resize();
+  placeCamera();
+  updateText();
+  requestAnimationFrame(frame);
+
+} catch(error) {
+  $("error").hidden = false;
+  $("error").textContent =
+    "3D көрініс жүктелмеді. Интернетті тексеріп, бетті жаңартыңыз. Браузер WebGL технологиясын қолдауы қажет.";
+}
+</script>
+</body>
+</html>
